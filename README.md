@@ -21,6 +21,18 @@ All components follow a **headless pattern**:
 - `useComponent.ts` - Logic hook (state & handlers)
 - Clean separation of concerns for maximum reusability
 
+## 📦 Installation
+
+```bash
+npm install manxz-components
+# or
+yarn add manxz-components
+```
+
+**Bundle size impact:** ~12KB minified (just the components you use)
+
+**Dependencies:** Zero! Only requires `react` and `react-native` which you already have.
+
 ## 📦 Components
 
 ### Button
@@ -44,7 +56,7 @@ Versatile button component with multiple variants and states.
 
 **Import:**
 ```typescript
-import { Button } from './src/components/Button';
+import { Button } from 'manxz-components';
 ```
 
 **Usage:**
@@ -96,7 +108,7 @@ The button provides multiple layers of tactile feedback when pressed:
 Centralized typography system in `src/styles/typography.ts`:
 
 ```typescript
-import { TYPOGRAPHY } from './src/styles/typography';
+import { TYPOGRAPHY } from 'manxz-components';
 
 // Use predefined styles
 const styles = StyleSheet.create({
@@ -121,7 +133,7 @@ See [FONT_SETUP.md](./FONT_SETUP.md) for installation instructions (Expo or bare
 Centralized color system in `src/styles/colors.ts`:
 
 ```typescript
-import { COLORS } from './src/styles/colors';
+import { COLORS } from 'manxz-components';
 
 const styles = StyleSheet.create({
   container: {
@@ -154,23 +166,11 @@ Using **Phosphor Icons**:
 - Size: 24px
 - Weights: regular, bold, light, etc.
 
-## 📦 Installation
-
-```bash
-npm install manxz-components
-# or
-yarn add manxz-components
-```
-
-**Bundle size impact:** ~12KB minified (just the components you use)
-
-**Dependencies:** Zero! Only requires `react` and `react-native` which you already have.
-
 ## 🔧 Setup
 
 ### 1. Install Font
 
-Add Nunito Bold to your project:
+Add Nunito to your project:
 
 ```bash
 # Using Expo
@@ -182,7 +182,7 @@ npx expo install expo-font @expo-google-fonts/nunito
 ### 2. Use Components
 
 ```tsx
-import { Button } from './src/components/Button';
+import { Button } from 'manxz-components';
 
 function App() {
   return (
@@ -194,6 +194,17 @@ function App() {
   );
 }
 ```
+
+## 📱 Preview on Your Phone
+
+Want to see components on your actual device?
+
+```bash
+cd expo-preview
+npm start
+```
+
+Then scan the QR code with Expo Go app! See [expo-preview/README.md](./expo-preview/README.md) for details.
 
 ## 🧪 Testing
 
@@ -243,4 +254,3 @@ Components include proper accessibility props and testID support:
 ## 📄 License
 
 Private - Manxz Components
-

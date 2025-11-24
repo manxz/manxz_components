@@ -1,5 +1,6 @@
 # Development files
 preview/
+expo-preview/
 node_modules/
 .git/
 .github/

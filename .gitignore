@@ -6,6 +6,11 @@ yarn-error.log*
 package-lock.json
 
 # Expo
+expo-preview/.expo/
+expo-preview/.expo-shared/
+expo-preview/dist/
+
+# Expo
 .expo/
 .expo-shared/
 dist/
