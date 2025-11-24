@@ -29,7 +29,7 @@ Outline:   #ffffff → #f4f4f4  (light gray)
 ```
 
 ### 2. Scale Animation
-- Scales down to **96%** on press
+- Scales down to **99%** on press (very subtle)
 - Spring animation with subtle bounce on release
 - Native driver for 60fps performance
 

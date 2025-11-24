@@ -65,7 +65,7 @@ export default function DebugApp() {
             <Text style={styles.feedbackTitle}>✨ Visual Feedback:</Text>
             <Text style={styles.feedbackText}>
               • Color changes (lighter shade){'\n'}
-              • Subtle scale animation (96%){'\n'}
+              • Subtle scale animation (99%){'\n'}
               • Smooth spring animation
             </Text>
           </View>

@@ -65,7 +65,7 @@ import { Button } from './src/components/Button';
 The button provides multiple layers of tactile feedback when pressed:
 
 1. **Color Change** - Background lightens to pressed state color
-2. **Scale Animation** - Subtle spring animation (scales to 96%)
+2. **Scale Animation** - Subtle spring animation (scales to 99%)
 3. **State Management** - Visual changes triggered by `onPressIn`/`onPressOut`
 
 ```tsx

@@ -50,7 +50,7 @@ export const useButton = ({
       // Animate scale down for tactile feedback
       if (scaleAnimation) {
         Animated.spring(scaleValue, {
-          toValue: 0.96,
+          toValue: 0.99,
           useNativeDriver: true,
           speed: 50,
           bounciness: 0,

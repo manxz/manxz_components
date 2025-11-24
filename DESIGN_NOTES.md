@@ -58,6 +58,7 @@ positiveHover: '#38e594'
 - Full-width buttons provide larger touch targets
 - Icons are 24x24 with adequate spacing
 - Border radius: 12px for comfortable tap areas
+- Subtle scale animation: 99% (barely noticeable but provides feedback)
 
 ## Accessibility
 
