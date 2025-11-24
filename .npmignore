@@ -1,0 +1,34 @@
+# Development files
+preview/
+node_modules/
+.git/
+.github/
+
+# Build files
+dist/
+build/
+*.tsbuildinfo
+
+# Config files
+vite.config.ts
+tsconfig.json
+web-font-loader.ts
+index.html
+react-native.config.js
+
+# Documentation (keep only main README and FONT_SETUP)
+DESIGN_NOTES.md
+src/components/Button/README.md
+src/components/Button/Button.example.tsx
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Misc
+.DS_Store
+*.log
+.env*
+
