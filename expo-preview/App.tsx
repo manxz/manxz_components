@@ -9,9 +9,9 @@ import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-n
 import { useFonts, Nunito_400Regular, Nunito_700Bold, Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
 import { ChatCircleText, Check, Trash, Gear, X } from 'phosphor-react-native';
 
-// Import components from parent directory
-import { Button } from '../src/components/Button';
-import { COLORS } from '../src/styles/colors';
+// Import components from local directory
+import { Button } from './components/Button';
+import { COLORS } from './styles/colors';
 
 export default function App() {
   const [loading, setLoading] = useState<string | null>(null);
