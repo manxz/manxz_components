@@ -237,8 +237,8 @@ const ButtonComponent: React.FC<ButtonProps> = ({
               icon
             ) : null}
           </View>
-          {/* Only show spacer if there's something in the icon container */}
-          {(loading || icon) && <View style={styles.spacer} />}
+          {/* Always reserve spacer space to prevent text shift */}
+          <View style={styles.spacer} />
           <Text style={getTextStyle()} numberOfLines={1}>
             {text}
           </Text>
