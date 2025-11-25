@@ -226,21 +226,19 @@ const ButtonComponent: React.FC<ButtonProps> = ({
         accessibilityLabel={text}
       >
         <View style={styles.content}>
-          {(loading || icon) && (
-            <>
-              <View style={styles.iconContainer}>
-                {loading ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={showLoadingIndicator ? COLORS.surface : COLORS.onSurface}
-                  />
-                ) : (
-                  icon
-                )}
-              </View>
-              <View style={styles.spacer} />
-            </>
-          )}
+          {/* Always reserve space to prevent layout shift */}
+          <View style={styles.iconContainer}>
+            {loading ? (
+              <ActivityIndicator
+                size="small"
+                color={showLoadingIndicator ? COLORS.surface : COLORS.onSurface}
+              />
+            ) : icon ? (
+              icon
+            ) : null}
+          </View>
+          {/* Only show spacer if there's something in the icon container */}
+          {(loading || icon) && <View style={styles.spacer} />}
           <Text style={getTextStyle()} numberOfLines={1}>
             {text}
           </Text>
