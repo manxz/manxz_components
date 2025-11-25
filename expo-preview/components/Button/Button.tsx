@@ -226,20 +226,21 @@ const ButtonComponent: React.FC<ButtonProps> = ({
         accessibilityLabel={text}
       >
         <View style={styles.content}>
-          {loading ? (
+          {(loading || icon) && (
             <>
-              <ActivityIndicator
-                size="small"
-                color={showLoadingIndicator ? COLORS.surface : COLORS.onSurface}
-              />
+              <View style={styles.iconContainer}>
+                {loading ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={showLoadingIndicator ? COLORS.surface : COLORS.onSurface}
+                  />
+                ) : (
+                  icon
+                )}
+              </View>
               <View style={styles.spacer} />
             </>
-          ) : icon ? (
-            <>
-              <View style={styles.iconContainer}>{icon}</View>
-              <View style={styles.spacer} />
-            </>
-          ) : null}
+          )}
           <Text style={getTextStyle()} numberOfLines={1}>
             {text}
           </Text>
