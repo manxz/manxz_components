@@ -9,6 +9,7 @@ export const COLORS = {
   primary: '#0070f3',
   primaryPressed: '#2385f8', // Active/pressed state (when finger touches button)
   primaryDisabled: 'rgba(0, 112, 243, 0.4)',
+  primarySurface: '#edf3fa', // Active input background
   
   // Positive (Success)
   positive: '#06df79',
@@ -19,6 +20,7 @@ export const COLORS = {
   negative: '#ff2600',
   negativePressed: '#ff5233', // Active/pressed state
   negativeDisabled: 'rgba(255, 38, 0, 0.4)',
+  negativeSurface: '#faefed', // Error input background
   
   // Neutral
   neutral: '#1d1d1f',
@@ -44,6 +46,8 @@ export const COLORS = {
   // States
   disabled: '#7d7d7f',
   disabledBackground: '#fafafa',
+  disabledText: '#a0a0a1',
+  surfaceDisabled: '#f4f4f4',
   
   // Backgrounds
   background: '#ffffff',

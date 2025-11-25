@@ -7,8 +7,9 @@
 import React, { useState } from 'react';
 import ComponentList from './ComponentList';
 import ButtonPreview from './ButtonPreview';
+import InputPreview from './InputPreview';
 
-type Screen = 'list' | 'button';
+type Screen = 'list' | 'button' | 'input';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('list');
@@ -17,6 +18,10 @@ export default function App() {
     {
       id: 'button',
       name: 'Button',
+    },
+    {
+      id: 'input',
+      name: 'Input',
     },
   ];
 
@@ -30,6 +35,10 @@ export default function App() {
 
   if (currentScreen === 'button') {
     return <ButtonPreview onBack={handleBack} />;
+  }
+
+  if (currentScreen === 'input') {
+    return <InputPreview onBack={handleBack} />;
   }
 
   return (
