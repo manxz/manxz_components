@@ -4,18 +4,14 @@
  * Scan QR code with Expo Go to see components on your phone!
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useFonts, Nunito_400Regular, Nunito_700Bold, Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
-import * as SplashScreen from 'expo-splash-screen';
 import { ChatCircleText, Check, Trash, Gear, X } from 'phosphor-react-native';
 
 // Import components from parent directory
 import { Button } from '../src/components/Button';
 import { COLORS } from '../src/styles/colors';
-
-// Keep splash screen visible while fonts load
-SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [loading, setLoading] = useState<string | null>(null);
@@ -27,16 +23,15 @@ export default function App() {
     'Nunito-ExtraBold': Nunito_800ExtraBold,
   });
 
-  // Hide splash screen when fonts are loaded
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
   // Show loading screen while fonts load
   if (!fontsLoaded) {
-    return null;
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading fonts...</Text>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   const handlePress = (variant: string) => {
@@ -46,7 +41,7 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} onLayout={onLayoutRootView}>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <View style={styles.content}>
           {/* Header */}
@@ -224,6 +219,15 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#7d7d7f',
   },
   content: {
     padding: 20,
