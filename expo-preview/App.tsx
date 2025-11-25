@@ -4,7 +4,7 @@
  * Scan QR code with Expo Go to see components on your phone!
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useFonts, Nunito_400Regular, Nunito_700Bold, Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
 import { ChatCircleText, Check, Trash, Gear, X } from 'phosphor-react-native';
@@ -14,8 +14,6 @@ import { Button } from './components/Button';
 import { COLORS } from './styles/colors';
 
 export default function App() {
-  const [loading, setLoading] = useState<string | null>(null);
-
   // Load fonts
   const [fontsLoaded] = useFonts({
     'Nunito-Regular': Nunito_400Regular,
@@ -33,11 +31,6 @@ export default function App() {
       </SafeAreaView>
     );
   }
-
-  const handlePress = (variant: string) => {
-    setLoading(variant);
-    setTimeout(() => setLoading(null), 2000);
-  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -60,8 +53,7 @@ export default function App() {
                 text="Primary Button"
                 variant="primary"
                 icon={<ChatCircleText size={24} color={COLORS.surface} weight="regular" />}
-                onPress={() => handlePress('primary-icon')}
-                loading={loading === 'primary-icon'}
+                onPress={() => console.log('Primary button pressed')}
                 fullWidth
               />
             </View>
@@ -71,8 +63,7 @@ export default function App() {
                 text="Positive Button"
                 variant="positive"
                 icon={<Check size={24} color={COLORS.surface} weight="bold" />}
-                onPress={() => handlePress('positive-icon')}
-                loading={loading === 'positive-icon'}
+                onPress={() => console.log('Positive button pressed')}
                 fullWidth
               />
             </View>
@@ -82,8 +73,7 @@ export default function App() {
                 text="Negative Button"
                 variant="negative"
                 icon={<Trash size={24} color={COLORS.surface} weight="regular" />}
-                onPress={() => handlePress('negative-icon')}
-                loading={loading === 'negative-icon'}
+                onPress={() => console.log('Negative button pressed')}
                 fullWidth
               />
             </View>
@@ -93,8 +83,7 @@ export default function App() {
                 text="Neutral Button"
                 variant="neutral"
                 icon={<Gear size={24} color={COLORS.surface} weight="regular" />}
-                onPress={() => handlePress('neutral-icon')}
-                loading={loading === 'neutral-icon'}
+                onPress={() => console.log('Neutral button pressed')}
                 fullWidth
               />
             </View>
@@ -104,8 +93,7 @@ export default function App() {
                 text="Outline Button"
                 variant="outline"
                 icon={<X size={24} color={COLORS.onSurface} weight="regular" />}
-                onPress={() => handlePress('outline-icon')}
-                loading={loading === 'outline-icon'}
+                onPress={() => console.log('Outline button pressed')}
                 fullWidth
               />
             </View>
@@ -119,8 +107,7 @@ export default function App() {
               <Button
                 text="Primary Button"
                 variant="primary"
-                onPress={() => handlePress('primary')}
-                loading={loading === 'primary'}
+                onPress={() => console.log('Primary button pressed')}
                 fullWidth
               />
             </View>
@@ -129,8 +116,7 @@ export default function App() {
               <Button
                 text="Positive Button"
                 variant="positive"
-                onPress={() => handlePress('positive')}
-                loading={loading === 'positive'}
+                onPress={() => console.log('Positive button pressed')}
                 fullWidth
               />
             </View>
@@ -139,8 +125,7 @@ export default function App() {
               <Button
                 text="Negative Button"
                 variant="negative"
-                onPress={() => handlePress('negative')}
-                loading={loading === 'negative'}
+                onPress={() => console.log('Negative button pressed')}
                 fullWidth
               />
             </View>
@@ -149,8 +134,7 @@ export default function App() {
               <Button
                 text="Neutral Button"
                 variant="neutral"
-                onPress={() => handlePress('neutral')}
-                loading={loading === 'neutral'}
+                onPress={() => console.log('Neutral button pressed')}
                 fullWidth
               />
             </View>
@@ -159,8 +143,7 @@ export default function App() {
               <Button
                 text="Outline Button"
                 variant="outline"
-                onPress={() => handlePress('outline')}
-                loading={loading === 'outline'}
+                onPress={() => console.log('Outline button pressed')}
                 fullWidth
               />
             </View>
@@ -199,12 +182,6 @@ export default function App() {
             </View>
           </View>
 
-          {/* Info */}
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
-              💡 Tap any button to see the 2-second loading state
-            </Text>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
