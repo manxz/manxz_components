@@ -4,8 +4,8 @@
  * Scan QR code with Expo Go to see components on your phone!
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useFonts, Nunito_400Regular, Nunito_700Bold, Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
 import { ChatCircleText, Check, Trash, Gear, X } from 'phosphor-react-native';
 
@@ -35,7 +35,6 @@ export default function App() {
   }
 
   const handlePress = (variant: string) => {
-    Alert.alert('Button Pressed', `You pressed the ${variant} button!`);
     setLoading(variant);
     setTimeout(() => setLoading(null), 2000);
   };
