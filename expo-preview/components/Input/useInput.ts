@@ -6,7 +6,6 @@
  */
 
 import { useState, useCallback } from 'react';
-import { NativeSyntheticEvent, TextInputFocusEventData } from 'react-native';
 
 export interface UseInputProps {
   /** Initial value */
@@ -16,9 +15,9 @@ export interface UseInputProps {
   /** Callback fired when input value changes */
   onChangeText?: (text: string) => void;
   /** Callback fired when input receives focus */
-  onFocus?: (event: NativeSyntheticEvent<TextInputFocusEventData>) => void;
+  onFocus?: () => void;
   /** Callback fired when input loses focus */
-  onBlur?: (event: NativeSyntheticEvent<TextInputFocusEventData>) => void;
+  onBlur?: () => void;
   /** Whether the input is disabled */
   disabled?: boolean;
 }
@@ -33,9 +32,9 @@ export interface UseInputReturn {
   /** Handle text change */
   handleChangeText: (text: string) => void;
   /** Handle focus event */
-  handleFocus: (event: NativeSyntheticEvent<TextInputFocusEventData>) => void;
+  handleFocus: () => void;
   /** Handle blur event */
-  handleBlur: (event: NativeSyntheticEvent<TextInputFocusEventData>) => void;
+  handleBlur: () => void;
 }
 
 export const useInput = ({
@@ -65,23 +64,17 @@ export const useInput = ({
     [disabled, controlledValue, onChangeText]
   );
 
-  const handleFocus = useCallback(
-    (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
-      if (!disabled) {
-        setIsFocused(true);
-        onFocus?.(event);
-      }
-    },
-    [disabled, onFocus]
-  );
+  const handleFocus = useCallback(() => {
+    if (!disabled) {
+      setIsFocused(true);
+      onFocus?.();
+    }
+  }, [disabled, onFocus]);
 
-  const handleBlur = useCallback(
-    (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
-      setIsFocused(false);
-      onBlur?.(event);
-    },
-    [onBlur]
-  );
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+    onBlur?.();
+  }, [onBlur]);
 
   return {
     value,

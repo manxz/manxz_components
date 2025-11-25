@@ -51,7 +51,7 @@ import { FONT_FAMILIES, FONT_WEIGHTS, FONT_SIZES } from '../../styles/typography
 // TYPES
 // ============================================================================
 
-export interface InputProps extends Omit<TextInputProps, 'value' | 'defaultValue' | 'onChangeText'> {
+export interface InputProps extends Omit<TextInputProps, 'value' | 'defaultValue' | 'onChangeText' | 'onFocus' | 'onBlur'> {
   /** Controlled input value */
   value?: string;
   /** Uncontrolled default value */
@@ -62,10 +62,22 @@ export interface InputProps extends Omit<TextInputProps, 'value' | 'defaultValue
   helperText?: string;
   /** Optional error text (triggers error state) */
   errorText?: string;
+  /** Whether input is disabled */
+  disabled?: boolean;
+  /** Callback when input receives focus */
+  onFocus?: () => void;
+  /** Callback when input loses focus */
+  onBlur?: () => void;
+  /** Callback when text changes */
+  onChangeText?: (text: string) => void;
   /** Whether input should take full width */
   fullWidth?: boolean;
   /** Test identifier */
   testID?: string;
+  /** @internal Whether this is inside an InputGroup */
+  _isGrouped?: boolean;
+  /** @internal Position in group */
+  _groupPosition?: 'first' | 'middle' | 'last' | 'only';
 }
 
 // ============================================================================
@@ -75,6 +87,7 @@ export interface InputProps extends Omit<TextInputProps, 'value' | 'defaultValue
 const SPACING = {
   height: 64,
   borderRadius: 12,
+  innerBorderRadius: 8, // Smaller radius for active state to fit inside container
   paddingHorizontal: 16,
   gap: 2, // Gap between label and input text
   gapInputHelper: 4, // Gap between input and helper text
@@ -105,6 +118,8 @@ const InputComponent: React.FC<InputProps> = ({
   onBlur,
   fullWidth = true,
   testID,
+  _isGrouped = false,
+  _groupPosition = 'only',
   ...textInputProps
 }) => {
   const {
@@ -151,13 +166,13 @@ const InputComponent: React.FC<InputProps> = ({
   // COMPUTED STYLES
   // ============================================================================
 
-  // Container background and border based on state
-  const getContainerStyle = () => {
+  // Container background and border based on state (for standalone inputs)
+  const getContainerStyle = (): { backgroundColor: string; borderWidth: number; borderColor: string } => {
     const isActive = (hasError || isFocused) && !isDisabled;
-    const borderWidth = isActive ? 2 : 1;
     
-    let backgroundColor = COLORS.white;
-    let borderColor = COLORS.outline;
+    let backgroundColor: string = COLORS.white;
+    let borderColor: string = COLORS.outline;
+    let borderWidth = isActive ? 2 : 1;
 
     if (isDisabled) {
       backgroundColor = COLORS.surfaceDisabled;
@@ -176,9 +191,88 @@ const InputComponent: React.FC<InputProps> = ({
     };
   };
 
+  // Get style for grouped inputs (background + border radius to match row)
+  const getGroupedStyle = (): any => {
+    let backgroundColor: string = COLORS.white;
+
+    if (isDisabled) {
+      backgroundColor = COLORS.surfaceDisabled;
+    } else if (hasError) {
+      backgroundColor = COLORS.negativeSurface;
+    } else if (isFocused) {
+      backgroundColor = COLORS.primarySurface;
+    }
+
+    const style: any = { backgroundColor };
+    
+    // Match border radius to row's border radius so background doesn't stick out
+    const radius = SPACING.borderRadius - 1; // Slightly smaller to fit inside row's border
+    switch (_groupPosition) {
+      case 'first':
+        style.borderTopLeftRadius = radius;
+        style.borderTopRightRadius = radius;
+        break;
+      case 'last':
+        style.borderBottomLeftRadius = radius;
+        style.borderBottomRightRadius = radius;
+        break;
+      case 'only':
+        style.borderRadius = radius;
+        break;
+    }
+
+    return style;
+  };
+
+  // Get border overlay style for grouped inputs (absolutely positioned, doesn't affect layout)
+  const getGroupedBorderOverlay = (): any => {
+    const isActive = (hasError || isFocused) && !isDisabled;
+    if (!isActive) return null;
+
+    const radius = SPACING.borderRadius;
+    const borderColor = hasError ? COLORS.negative : COLORS.primary;
+    
+    const style: any = {
+      position: 'absolute',
+      // Extend outside to cover the row's 1px border
+      left: -1,
+      right: -1,
+      borderWidth: 2,
+      borderColor,
+      pointerEvents: 'none',
+    };
+
+    switch (_groupPosition) {
+      case 'first':
+        style.top = -1;
+        style.bottom = -1; // Extend to cover divider
+        style.borderTopLeftRadius = radius;
+        style.borderTopRightRadius = radius;
+        break;
+      case 'last':
+        style.top = -1; // Extend to cover divider above
+        style.bottom = -1;
+        style.borderBottomLeftRadius = radius;
+        style.borderBottomRightRadius = radius;
+        break;
+      case 'only':
+        style.top = -1;
+        style.bottom = -1;
+        style.borderRadius = radius;
+        break;
+      default: // middle
+        style.top = -1;
+        style.bottom = -1;
+        break;
+    }
+
+    return style;
+  };
+
   // Compensate padding for border width change (1px border = 16px padding, 2px border = 15px padding)
-  // This prevents content shift when border changes
+  // This prevents content shift when border changes (only for standalone, grouped uses overlay)
   const getContentPadding = () => {
+    if (_isGrouped) return SPACING.paddingHorizontal; // No compensation needed for grouped
     const isActive = (hasError || isFocused) && !isDisabled;
     return isActive ? SPACING.paddingHorizontal - 1 : SPACING.paddingHorizontal;
   };
@@ -224,6 +318,52 @@ const InputComponent: React.FC<InputProps> = ({
   // ============================================================================
   // RENDER
   // ============================================================================
+
+  // Grouped inputs render with border overlay (no layout shifts)
+  if (_isGrouped) {
+    const borderOverlay = getGroupedBorderOverlay();
+    
+    return (
+      <TouchableWithoutFeedback onPress={handleContainerPress}>
+        <View 
+          style={[
+            styles.groupedContainer, 
+            fullWidth && styles.fullWidth, 
+            getGroupedStyle(),
+          ]}
+        >
+          {/* Border overlay - absolutely positioned, doesn't affect layout */}
+          {borderOverlay && <View style={borderOverlay} />}
+          
+          <View style={[styles.content, { paddingHorizontal: getContentPadding() }]}>
+            {placeholder && (
+              <Animated.Text 
+                style={[styles.label, animatedLabelStyle]} 
+                pointerEvents="none"
+                numberOfLines={1}
+              >
+                {placeholder}
+              </Animated.Text>
+            )}
+            <Animated.View style={{ opacity: inputOpacity, height: inputHeight, width: '100%', overflow: 'hidden' }}>
+              <TextInput
+                ref={inputRef}
+                style={[styles.input, { color: getInputColor() }]}
+                value={value}
+                onChangeText={handleChangeText}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                placeholder={undefined}
+                editable={!isDisabled}
+                testID={testID ? `${testID}-input` : undefined}
+                {...textInputProps}
+              />
+            </Animated.View>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    );
+  }
 
   return (
     <View style={styles.wrapper} testID={testID}>
@@ -292,6 +432,11 @@ const styles = StyleSheet.create({
     height: SPACING.height,
     borderRadius: SPACING.borderRadius,
     overflow: 'hidden',
+  },
+  groupedContainer: {
+    height: SPACING.height,
+    position: 'relative',
+    overflow: 'visible', // Allow border overlay to extend outside
   },
   fullWidth: {
     width: '100%',

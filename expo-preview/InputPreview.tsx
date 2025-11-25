@@ -8,7 +8,7 @@ import { useFonts, Nunito_400Regular, Nunito_500Medium, Nunito_700Bold } from '@
 import { ArrowLeft } from 'phosphor-react-native';
 
 // Import components from local directory
-import { Input } from './components/Input';
+import { Input, InputSplit, InputGroup } from './components/Input';
 import { COLORS } from './styles/colors';
 
 interface InputPreviewProps {
@@ -16,7 +16,6 @@ interface InputPreviewProps {
 }
 
 export default function InputPreview({ onBack }: InputPreviewProps) {
-  const [defaultValue, setDefaultValue] = useState('');
   const [filledValue, setFilledValue] = useState('Typed');
   const [errorValue, setErrorValue] = useState('Typed');
 
@@ -40,7 +39,7 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           {/* Header with Back Button */}
           <View style={styles.header}>
@@ -126,6 +125,51 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
               />
             </View>
           </View>
+
+          {/* Section: Split Input */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Split Input</Text>
+            <Text style={styles.description}>Two inputs side by side</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputSplit
+                leftPlaceholder="Quantity"
+                rightPlaceholder="Price"
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <InputSplit
+                leftPlaceholder="Quantity"
+                leftDefaultValue="10"
+                rightPlaceholder="Price"
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Group */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Group</Text>
+            <Text style={styles.description}>Stacked inputs with dividers</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputGroup>
+                <Input placeholder="Line item" />
+                <InputSplit
+                  leftPlaceholder="Quantity"
+                  rightPlaceholder="Price"
+                />
+              </InputGroup>
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <InputGroup>
+                <Input placeholder="Full name" />
+                <Input placeholder="Email address" />
+                <Input placeholder="Phone number" />
+              </InputGroup>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -151,6 +195,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingBottom: 400, // Extra space so content is visible above keyboard
   },
   header: {
     flexDirection: 'row',
@@ -192,4 +237,3 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 });
-
