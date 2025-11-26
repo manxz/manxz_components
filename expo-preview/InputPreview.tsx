@@ -8,7 +8,8 @@ import { useFonts, Nunito_400Regular, Nunito_500Medium, Nunito_700Bold } from '@
 import { ArrowLeft } from 'phosphor-react-native';
 
 // Import components from local directory
-import { Input, InputSplit, InputSelect, InputAddress, InputGroup } from './components/Input';
+import { Input, InputSplit, InputSelect, InputAddress, InputRadio, InputBank, InputMenu, InputGroup } from './components/Input';
+import type { BankAccount } from './components/Input';
 import type { AddressSuggestion } from './components/Input';
 import { COLORS } from './styles/colors';
 
@@ -57,6 +58,32 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
   const [filledAddress] = useState('8689 Velma Ln., Tracy, CA');
   const [errorAddress] = useState('8689 Velma Ln., Tracy, CA');
+
+  // InputRadio state
+  const [selectedRadio, setSelectedRadio] = useState<string>('option2');
+
+  // Chase logo component for preview (approximates the Chase octagon logo)
+  const ChaseLogo = () => (
+    <View style={{ width: 26, height: 26, position: 'relative' }}>
+      {/* Top blade */}
+      <View style={{ position: 'absolute', top: 0, left: 9, width: 8, height: 13, backgroundColor: '#fff', borderRadius: 1 }} />
+      {/* Right blade */}
+      <View style={{ position: 'absolute', top: 9, right: 0, width: 13, height: 8, backgroundColor: '#fff', borderRadius: 1 }} />
+      {/* Bottom blade */}
+      <View style={{ position: 'absolute', bottom: 0, right: 9, width: 8, height: 13, backgroundColor: '#fff', borderRadius: 1 }} />
+      {/* Left blade */}
+      <View style={{ position: 'absolute', bottom: 9, left: 0, width: 13, height: 8, backgroundColor: '#fff', borderRadius: 1 }} />
+    </View>
+  );
+
+  // InputBank mock data
+  const connectedBank: BankAccount = {
+    name: 'Chase Bank',
+    logoComponent: <ChaseLogo />,
+    logoBackgroundColor: '#004fc2',
+    routingNumber: '028000212',
+    cardLastFour: '5671',
+  };
 
   // Simulate fetching address suggestions (called when typing in modal)
   const handleAddressSearch = (text: string) => {
@@ -400,6 +427,158 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
                 />
                 <Input placeholder="Phone number" />
               </InputGroup>
+            </View>
+          </View>
+
+          {/* Section: Input Radio in Group */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Radio in Group</Text>
+            <Text style={styles.description}>Single selection from multiple options</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputGroup
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+              >
+                <InputRadio
+                  label="Option 1"
+                  selected={selectedRadio === 'option1'}
+                  onPress={() => setSelectedRadio('option1')}
+                />
+                <InputRadio
+                  label="Option 2"
+                  selected={selectedRadio === 'option2'}
+                  onPress={() => setSelectedRadio('option2')}
+                />
+                <InputRadio
+                  label="Option 3"
+                  selected={selectedRadio === 'option3'}
+                  onPress={() => setSelectedRadio('option3')}
+                />
+              </InputGroup>
+            </View>
+          </View>
+
+          {/* Section: Input Radio States */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Radio States</Text>
+            <Text style={styles.description}>All possible radio states</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputGroup>
+                <InputRadio
+                  label="Default (unselected)"
+                  selected={false}
+                  onPress={() => {}}
+                />
+                <InputRadio
+                  label="Selected"
+                  selected={true}
+                  onPress={() => {}}
+                />
+                <InputRadio
+                  label="Error state"
+                  selected={false}
+                  errorText="This option has an error"
+                  onPress={() => {}}
+                />
+                <InputRadio
+                  label="Disabled"
+                  selected={false}
+                  disabled
+                  onPress={() => {}}
+                />
+              </InputGroup>
+            </View>
+          </View>
+
+          {/* Section: Input Bank Empty */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Bank - Empty</Text>
+            <Text style={styles.description}>No bank connected</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputBank
+                onPress={() => console.log('Connect bank pressed')}
+                helperText="This is the account where you want to receive payments from your customers"
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Bank Filled */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Bank - Filled</Text>
+            <Text style={styles.description}>Bank account connected</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputBank
+                bank={connectedBank}
+                onPress={() => console.log('Change bank pressed')}
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Bank States */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Bank States</Text>
+            <Text style={styles.description}>Error and disabled states</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputBank
+                bank={connectedBank}
+                errorText="There was an issue with this bank account"
+                onPress={() => {}}
+              />
+            </View>
+
+            <View style={[styles.inputWrapper, { marginTop: 16 }]}>
+              <InputBank
+                disabled
+                onPress={() => {}}
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Menu */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Menu</Text>
+            <Text style={styles.description}>Navigation rows for settings</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputGroup>
+                <InputMenu 
+                  label="Account Settings" 
+                  onPress={() => console.log('Account Settings')} 
+                />
+                <InputMenu 
+                  label="Notifications" 
+                  onPress={() => console.log('Notifications')} 
+                />
+                <InputMenu 
+                  label="Privacy & Security" 
+                  onPress={() => console.log('Privacy')} 
+                />
+              </InputGroup>
+            </View>
+          </View>
+
+          {/* Section: Input Menu Single */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Menu - Single</Text>
+            <Text style={styles.description}>Standalone menu item</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputMenu 
+                label="Logout" 
+                onPress={() => console.log('Logout')} 
+              />
+            </View>
+
+            <View style={[styles.inputWrapper, { marginTop: 16 }]}>
+              <InputMenu 
+                label="Disabled Item" 
+                disabled
+                onPress={() => {}} 
+              />
             </View>
           </View>
         </View>
