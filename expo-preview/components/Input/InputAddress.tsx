@@ -34,20 +34,18 @@
  * />
  */
 
-import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   Modal,
   SafeAreaView,
   ScrollView,
   Animated,
 } from 'react-native';
-import { X } from 'phosphor-react-native';
 import { COLORS } from '../../styles/colors';
 import { FONT_FAMILIES, FONT_WEIGHTS, FONT_SIZES } from '../../styles/typography';
 
@@ -177,6 +175,7 @@ const SuggestionItem: React.FC<SuggestionItemProps> = memo(({
 interface AddressModalProps {
   visible: boolean;
   placeholder: string;
+  initialValue: string;
   suggestions: AddressSuggestion[];
   onChangeText: (text: string) => void;
   onSelectAddress: (address: string) => void;
@@ -186,24 +185,29 @@ interface AddressModalProps {
 const AddressModal: React.FC<AddressModalProps> = memo(({
   visible,
   placeholder,
+  initialValue,
   suggestions,
   onChangeText,
   onSelectAddress,
   onClose,
 }) => {
   const [searchText, setSearchText] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
-  // Reset search text when modal opens
+  // Initialize with current value and focus input when modal opens
   useEffect(() => {
     if (visible) {
-      setSearchText('');
-      // Auto-focus the input when modal opens
+      setSearchText(initialValue || '');
+      setIsFocused(true);
+      // Focus input after modal animation completes
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
+    } else {
+      setIsFocused(false);
     }
-  }, [visible]);
+  }, [visible, initialValue]);
 
   const handleChangeText = useCallback((text: string) => {
     setSearchText(text);
@@ -215,12 +219,48 @@ const AddressModal: React.FC<AddressModalProps> = memo(({
     onClose();
   }, [onSelectAddress, onClose]);
 
-  const handleSelectButtonPress = useCallback(() => {
+  const handleDone = useCallback(() => {
     if (searchText.trim()) {
-      onSelectAddress(searchText);
-      onClose();
+      onSelectAddress(searchText.trim());
     }
+    onClose();
   }, [searchText, onSelectAddress, onClose]);
+
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+  }, []);
+
+  // Input states
+  const hasValue = searchText.length > 0;
+  const showLabel = hasValue || isFocused;
+  const isActive = isFocused;
+
+  // Animation for label
+  const labelAnim = useRef(new Animated.Value(1)).current; // Start at 1 (focused state)
+
+  useEffect(() => {
+    Animated.timing(labelAnim, {
+      toValue: showLabel ? 1 : 0,
+      duration: 150,
+      useNativeDriver: false,
+    }).start();
+  }, [showLabel, labelAnim]);
+
+  const animatedLabelStyle = {
+    fontSize: labelAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [FONT_SIZES.xl, FONT_SIZES.sm],
+    }),
+    lineHeight: labelAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [27, 19],
+    }),
+    color: COLORS.subtext,
+  };
 
   return (
     <Modal
@@ -230,50 +270,42 @@ const AddressModal: React.FC<AddressModalProps> = memo(({
       onRequestClose={onClose}
     >
       <SafeAreaView style={styles.modalContainer}>
-        {/* Close button */}
+        {/* Header with Done button */}
         <View style={styles.modalHeader}>
           <TouchableOpacity 
-            style={styles.closeButton} 
-            onPress={onClose}
+            style={styles.doneButton} 
+            onPress={handleDone}
             activeOpacity={0.7}
           >
-            <X size={24} color={COLORS.onSurface} weight="regular" />
+            <Text style={styles.doneButtonText}>Done</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Search Input */}
+        {/* Search Input - custom implementation matching Input component styling */}
         <View style={styles.modalInputContainer}>
-          <View style={[styles.modalInputWrapper, searchText.length > 0 && styles.modalInputWrapperActive]}>
+          <View style={[
+            styles.modalInputWrapper,
+            isActive && styles.modalInputWrapperActive
+          ]}>
             <View style={styles.modalInputContent}>
               {/* Animated label */}
-              <Text style={[
-                styles.modalInputLabel,
-                searchText.length > 0 && styles.modalInputLabelSmall
-              ]}>
+              <Animated.Text 
+                style={[styles.modalInputLabel, animatedLabelStyle]}
+                pointerEvents="none"
+              >
                 {placeholder}
-              </Text>
-              {searchText.length > 0 && (
-                <TextInput
-                  ref={inputRef}
-                  style={styles.modalInput}
-                  value={searchText}
-                  onChangeText={handleChangeText}
-                  autoFocus
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-              )}
-              {searchText.length === 0 && (
-                <TextInput
-                  ref={inputRef}
-                  style={[styles.modalInput, styles.modalInputPlaceholder]}
-                  value={searchText}
-                  onChangeText={handleChangeText}
-                  autoFocus
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-              )}
+              </Animated.Text>
+              {/* Input - always visible when modal is open */}
+              <TextInput
+                ref={inputRef}
+                style={styles.modalTextInput}
+                value={searchText}
+                onChangeText={handleChangeText}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                autoCapitalize="words"
+                autoCorrect={false}
+              />
             </View>
           </View>
         </View>
@@ -293,26 +325,6 @@ const AddressModal: React.FC<AddressModalProps> = memo(({
             />
           ))}
         </ScrollView>
-
-        {/* Select Button */}
-        <View style={styles.modalFooter}>
-          <TouchableOpacity
-            style={[
-              styles.selectButton,
-              !searchText.trim() && styles.selectButtonDisabled
-            ]}
-            onPress={handleSelectButtonPress}
-            activeOpacity={0.8}
-            disabled={!searchText.trim()}
-          >
-            <Text style={[
-              styles.selectButtonText,
-              !searchText.trim() && styles.selectButtonTextDisabled
-            ]}>
-              Select address
-            </Text>
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
     </Modal>
   );
@@ -560,6 +572,7 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
         <AddressModal
           visible={isModalVisible}
           placeholder={placeholder}
+          initialValue={value || ''}
           suggestions={limitedSuggestions}
           onChangeText={handleChangeText}
           onSelectAddress={handleSelectAddress}
@@ -618,6 +631,7 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
       <AddressModal
         visible={isModalVisible}
         placeholder={placeholder}
+        initialValue={value || ''}
         suggestions={limitedSuggestions}
         onChangeText={handleChangeText}
         onSelectAddress={handleSelectAddress}
@@ -701,14 +715,19 @@ const styles = StyleSheet.create({
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  doneButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  doneButtonText: {
+    fontFamily: FONT_FAMILIES.nunito.bold,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.primary,
   },
   modalInputContainer: {
     paddingHorizontal: 20,
@@ -734,16 +753,9 @@ const styles = StyleSheet.create({
   },
   modalInputLabel: {
     fontFamily: FONT_FAMILIES.nunito.medium,
-    fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.medium,
-    color: COLORS.subtext,
-    lineHeight: 27,
   },
-  modalInputLabelSmall: {
-    fontSize: FONT_SIZES.sm,
-    lineHeight: 19,
-  },
-  modalInput: {
+  modalTextInput: {
     fontFamily: FONT_FAMILIES.nunito.medium,
     fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.medium,
@@ -751,14 +763,7 @@ const styles = StyleSheet.create({
     lineHeight: 27,
     padding: 0,
     margin: 0,
-  },
-  modalInputPlaceholder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0,
+    height: 27,
   },
   suggestionsList: {
     flex: 1,
@@ -779,29 +784,6 @@ const styles = StyleSheet.create({
   suggestionTextBold: {
     fontFamily: FONT_FAMILIES.nunito.bold,
     fontWeight: FONT_WEIGHTS.bold,
-  },
-  modalFooter: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  selectButton: {
-    height: SPACING.height,
-    backgroundColor: COLORS.neutral,
-    borderRadius: SPACING.borderRadius,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectButtonDisabled: {
-    backgroundColor: COLORS.surfaceDisabled,
-  },
-  selectButtonText: {
-    fontFamily: FONT_FAMILIES.nunito.bold,
-    fontSize: FONT_SIZES.xl,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.white,
-  },
-  selectButtonTextDisabled: {
-    color: COLORS.disabledText,
   },
 });
 
