@@ -55,12 +55,11 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
   // InputAddress state
   const [addressValue, setAddressValue] = useState('');
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
-  const [filledAddress, setFilledAddress] = useState('8689 Velma Ln., Tracy, CA');
-  const [errorAddress, setErrorAddress] = useState('8689 Velma Ln., Tracy, CA');
+  const [filledAddress] = useState('8689 Velma Ln., Tracy, CA');
+  const [errorAddress] = useState('8689 Velma Ln., Tracy, CA');
 
-  // Simulate fetching address suggestions
-  const handleAddressChange = (text: string) => {
-    setAddressValue(text);
+  // Simulate fetching address suggestions (called when typing in modal)
+  const handleAddressSearch = (text: string) => {
     // Show suggestions when typing (in real app, debounce and call API)
     if (text.length >= 3) {
       // Filter mock suggestions to match input
@@ -73,8 +72,8 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
     }
   };
 
-  const handleSelectAddress = (suggestion: AddressSuggestion) => {
-    setAddressValue(suggestion.address);
+  const handleSelectAddress = (address: string) => {
+    setAddressValue(address);
     setAddressSuggestions([]);
   };
 
@@ -319,45 +318,43 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
           </View>
 
           {/* Section: Input Address */}
-          <View style={[styles.section, { zIndex: 100 }]}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Input Address</Text>
-            <Text style={styles.description}>Autocomplete with suggestions (type "8689")</Text>
+            <Text style={styles.description}>Opens modal with search (type "8689")</Text>
             
             <View style={styles.inputWrapper}>
               <InputAddress
                 placeholder="Address"
                 value={addressValue}
                 suggestions={addressSuggestions}
-                onChangeText={handleAddressChange}
-                onSelectSuggestion={handleSelectAddress}
+                onChangeText={handleAddressSearch}
+                onSelectAddress={handleSelectAddress}
                 helperText="This text helper is optional and can span as many lines as needed. But keep it short."
               />
             </View>
           </View>
 
           {/* Section: Input Address Filled */}
-          <View style={[styles.section, { zIndex: 1 }]}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Input Address - Filled</Text>
             
             <View style={styles.inputWrapper}>
               <InputAddress
                 placeholder="Address"
                 value={filledAddress}
-                onChangeText={setFilledAddress}
                 helperText="This text helper is optional and can span as many lines as needed. But keep it short."
               />
             </View>
           </View>
 
           {/* Section: Input Address Error */}
-          <View style={[styles.section, { zIndex: 1 }]}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Input Address - Error</Text>
             
             <View style={styles.inputWrapper}>
               <InputAddress
                 placeholder="Address"
                 value={errorAddress}
-                onChangeText={setErrorAddress}
                 helperText="This text helper is optional and can span as many lines as needed. But keep it short."
                 errorText="If helper text exists, then the error validation text goes under it. Like this."
               />
@@ -365,7 +362,7 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
           </View>
 
           {/* Section: Input Address Disabled */}
-          <View style={[styles.section, { zIndex: 1 }]}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Input Address - Disabled</Text>
             
             <View style={styles.inputWrapper}>
@@ -387,9 +384,9 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
           </View>
 
           {/* Section: Input Address in Group */}
-          <View style={[styles.section, { zIndex: 50 }]}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Input Address in Group</Text>
-            <Text style={styles.description}>Combined with other inputs (type "8689")</Text>
+            <Text style={styles.description}>Combined with other inputs</Text>
             
             <View style={styles.inputWrapper}>
               <InputGroup>
@@ -398,8 +395,8 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
                   placeholder="Address"
                   value={addressValue}
                   suggestions={addressSuggestions}
-                  onChangeText={handleAddressChange}
-                  onSelectSuggestion={handleSelectAddress}
+                  onChangeText={handleAddressSearch}
+                  onSelectAddress={handleSelectAddress}
                 />
                 <Input placeholder="Phone number" />
               </InputGroup>

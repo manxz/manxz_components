@@ -2,27 +2,24 @@
  * InputAddress Component
  * 
  * Description:
- * An address input with autocomplete suggestions dropdown.
- * Visually matches the Input component with added suggestion list.
+ * An address input that opens a full-screen modal for address search.
+ * Similar to InputSelect but with a text input inside the modal for searching.
  * 
  * Props:
- * - value: string — Controlled input value
+ * - value: string — The currently selected address
  * - placeholder: string — Placeholder text (default: "Address")
  * - suggestions: Array<{id: string, address: string}> — Autocomplete suggestions
  * - helperText: string — Optional helper text shown below input
  * - errorText: string — Optional error text (shows error state)
- * - disabled: boolean — Disables input interactions
- * - onChangeText: (text: string) => void — Callback when text changes (use to fetch suggestions)
- * - onSelectSuggestion: (suggestion) => void — Callback when user selects a suggestion
- * - onFocus: () => void — Callback when input receives focus
- * - onBlur: () => void — Callback when input loses focus
+ * - disabled: boolean — Disables interactions
+ * - onChangeText: (text: string) => void — Callback when search text changes (use to fetch suggestions)
+ * - onSelectAddress: (address: string) => void — Callback when address is selected
  * - fullWidth: boolean — Whether input should take full width (default: true)
  * - testID: string — Test identifier
- * - highlightMatch: boolean — Whether to bold the matching text in suggestions (default: true)
+ * - maxSuggestions: number — Maximum suggestions to show (default: 5)
  * 
  * States supported:
  * - default: Normal state with placeholder
- * - active/focused: Blue border, shows suggestions if available
  * - filled: Has selected address value
  * - error: Red border, error text shown
  * - disabled: Non-interactive, muted appearance
@@ -33,21 +30,23 @@
  *   value={address}
  *   suggestions={addressSuggestions}
  *   onChangeText={(text) => fetchSuggestions(text)}
- *   onSelectSuggestion={(suggestion) => setAddress(suggestion.address)}
+ *   onSelectAddress={(address) => setAddress(address)}
  * />
  */
 
-import React, { memo, useRef, useEffect, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
 import {
-  TextInput,
   View,
   Text,
+  TextInput,
   StyleSheet,
-  TouchableWithoutFeedback,
   TouchableOpacity,
-  Animated,
+  Modal,
+  SafeAreaView,
   ScrollView,
+  Animated,
 } from 'react-native';
+import { X } from 'phosphor-react-native';
 import { COLORS } from '../../styles/colors';
 import { FONT_FAMILIES, FONT_WEIGHTS, FONT_SIZES } from '../../styles/typography';
 
@@ -63,7 +62,7 @@ export interface AddressSuggestion {
 }
 
 export interface InputAddressProps {
-  /** Controlled input value */
+  /** Currently selected address */
   value?: string;
   /** Placeholder text */
   placeholder?: string;
@@ -77,20 +76,14 @@ export interface InputAddressProps {
   errorText?: string;
   /** Whether input is disabled */
   disabled?: boolean;
-  /** Callback when text changes */
+  /** Callback when search text changes (use to fetch suggestions) */
   onChangeText?: (text: string) => void;
-  /** Callback when a suggestion is selected */
-  onSelectSuggestion?: (suggestion: AddressSuggestion) => void;
-  /** Callback when input receives focus */
-  onFocus?: () => void;
-  /** Callback when input loses focus */
-  onBlur?: () => void;
+  /** Callback when address is selected */
+  onSelectAddress?: (address: string) => void;
   /** Whether input should take full width */
   fullWidth?: boolean;
   /** Test identifier */
   testID?: string;
-  /** Whether to highlight matching text in suggestions */
-  highlightMatch?: boolean;
   /** @internal Whether this is inside an InputGroup */
   _isGrouped?: boolean;
   /** @internal Position in group */
@@ -118,14 +111,6 @@ const SHADOW = {
   elevation: 2,
 };
 
-const DROPDOWN_SHADOW = {
-  shadowColor: '#1d1d1f',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.15,
-  shadowRadius: 12,
-  elevation: 8,
-};
-
 // ============================================================================
 // SUGGESTION ITEM COMPONENT
 // ============================================================================
@@ -133,23 +118,21 @@ const DROPDOWN_SHADOW = {
 interface SuggestionItemProps {
   suggestion: AddressSuggestion;
   searchText: string;
-  highlightMatch: boolean;
-  onSelect: (suggestion: AddressSuggestion) => void;
+  onSelect: (address: string) => void;
 }
 
 const SuggestionItem: React.FC<SuggestionItemProps> = memo(({
   suggestion,
   searchText,
-  highlightMatch,
   onSelect,
 }) => {
   const handlePress = useCallback(() => {
-    onSelect(suggestion);
-  }, [suggestion, onSelect]);
+    onSelect(suggestion.address);
+  }, [suggestion.address, onSelect]);
 
   // Render address with highlighted matching text
   const renderHighlightedText = () => {
-    if (!highlightMatch || !searchText) {
+    if (!searchText) {
       return <Text style={styles.suggestionText}>{suggestion.address}</Text>;
     }
 
@@ -187,11 +170,159 @@ const SuggestionItem: React.FC<SuggestionItemProps> = memo(({
 });
 
 // ============================================================================
+// MODAL COMPONENT
+// ============================================================================
+
+interface AddressModalProps {
+  visible: boolean;
+  placeholder: string;
+  suggestions: AddressSuggestion[];
+  onChangeText: (text: string) => void;
+  onSelectAddress: (address: string) => void;
+  onClose: () => void;
+}
+
+const AddressModal: React.FC<AddressModalProps> = memo(({
+  visible,
+  placeholder,
+  suggestions,
+  onChangeText,
+  onSelectAddress,
+  onClose,
+}) => {
+  const [searchText, setSearchText] = useState('');
+  const inputRef = useRef<TextInput>(null);
+
+  // Reset search text when modal opens
+  useEffect(() => {
+    if (visible) {
+      setSearchText('');
+      // Auto-focus the input when modal opens
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [visible]);
+
+  const handleChangeText = useCallback((text: string) => {
+    setSearchText(text);
+    onChangeText(text);
+  }, [onChangeText]);
+
+  const handleSelectAddress = useCallback((address: string) => {
+    onSelectAddress(address);
+    onClose();
+  }, [onSelectAddress, onClose]);
+
+  const handleSelectButtonPress = useCallback(() => {
+    if (searchText.trim()) {
+      onSelectAddress(searchText);
+      onClose();
+    }
+  }, [searchText, onSelectAddress, onClose]);
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="formSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={styles.modalContainer}>
+        {/* Close button */}
+        <View style={styles.modalHeader}>
+          <TouchableOpacity 
+            style={styles.closeButton} 
+            onPress={onClose}
+            activeOpacity={0.7}
+          >
+            <X size={24} color={COLORS.onSurface} weight="regular" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Search Input */}
+        <View style={styles.modalInputContainer}>
+          <View style={[styles.modalInputWrapper, searchText.length > 0 && styles.modalInputWrapperActive]}>
+            <View style={styles.modalInputContent}>
+              {/* Animated label */}
+              <Text style={[
+                styles.modalInputLabel,
+                searchText.length > 0 && styles.modalInputLabelSmall
+              ]}>
+                {placeholder}
+              </Text>
+              {searchText.length > 0 && (
+                <TextInput
+                  ref={inputRef}
+                  style={styles.modalInput}
+                  value={searchText}
+                  onChangeText={handleChangeText}
+                  autoFocus
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                />
+              )}
+              {searchText.length === 0 && (
+                <TextInput
+                  ref={inputRef}
+                  style={[styles.modalInput, styles.modalInputPlaceholder]}
+                  value={searchText}
+                  onChangeText={handleChangeText}
+                  autoFocus
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                />
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* Suggestions List */}
+        <ScrollView 
+          style={styles.suggestionsList}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {suggestions.map((suggestion) => (
+            <SuggestionItem
+              key={suggestion.id}
+              suggestion={suggestion}
+              searchText={searchText}
+              onSelect={handleSelectAddress}
+            />
+          ))}
+        </ScrollView>
+
+        {/* Select Button */}
+        <View style={styles.modalFooter}>
+          <TouchableOpacity
+            style={[
+              styles.selectButton,
+              !searchText.trim() && styles.selectButtonDisabled
+            ]}
+            onPress={handleSelectButtonPress}
+            activeOpacity={0.8}
+            disabled={!searchText.trim()}
+          >
+            <Text style={[
+              styles.selectButtonText,
+              !searchText.trim() && styles.selectButtonTextDisabled
+            ]}>
+              Select address
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
+});
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
 const InputAddressComponent: React.FC<InputAddressProps> = ({
-  value = '',
+  value,
   placeholder = 'Address',
   suggestions = [],
   maxSuggestions = 5,
@@ -199,97 +330,64 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
   errorText,
   disabled = false,
   onChangeText,
-  onSelectSuggestion,
-  onFocus,
-  onBlur,
+  onSelectAddress,
   fullWidth = true,
   testID,
-  highlightMatch = true,
   _isGrouped = false,
   _groupPosition = 'only',
 }) => {
-  // Limit suggestions to maxSuggestions
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  
+  // Limit suggestions
   const limitedSuggestions = suggestions.slice(0, maxSuggestions);
-  const inputRef = useRef<TextInput>(null);
-  const [isFocused, setIsFocused] = useState(false);
-  const [internalValue, setInternalValue] = useState(value);
-
-  // Sync internal value with controlled value
-  useEffect(() => {
-    setInternalValue(value);
-  }, [value]);
-
-  // State flags
-  const currentValue = value !== undefined ? value : internalValue;
-  const hasValue = currentValue.length > 0;
-  const showLabel = hasValue || isFocused;
+  
+  const hasValue = !!value;
   const hasError = !!errorText;
   const isDisabled = disabled;
-  const showSuggestions = isFocused && limitedSuggestions.length > 0 && !isDisabled;
 
-  // Animation for label position/size
-  const labelAnim = useRef(new Animated.Value(showLabel ? 1 : 0)).current;
+  // Animation for label
+  const labelAnim = useRef(new Animated.Value(hasValue ? 1 : 0)).current;
 
   useEffect(() => {
     Animated.timing(labelAnim, {
-      toValue: showLabel ? 1 : 0,
+      toValue: hasValue ? 1 : 0,
       duration: 150,
       useNativeDriver: false,
     }).start();
-  }, [showLabel, labelAnim]);
+  }, [hasValue, labelAnim]);
 
-  const handleContainerPress = () => {
-    if (!isDisabled && inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  const handleFocus = useCallback(() => {
+  const handlePress = useCallback(() => {
     if (!isDisabled) {
-      setIsFocused(true);
-      onFocus?.();
+      setIsModalVisible(true);
     }
-  }, [isDisabled, onFocus]);
+  }, [isDisabled]);
 
-  const handleBlur = useCallback(() => {
-    // Delay blur to allow suggestion tap to register
-    setTimeout(() => {
-      setIsFocused(false);
-      onBlur?.();
-    }, 150);
-  }, [onBlur]);
+  const handleClose = useCallback(() => {
+    setIsModalVisible(false);
+  }, []);
 
   const handleChangeText = useCallback((text: string) => {
-    setInternalValue(text);
     onChangeText?.(text);
   }, [onChangeText]);
 
-  const handleSelectSuggestion = useCallback((suggestion: AddressSuggestion) => {
-    setInternalValue(suggestion.address);
-    onChangeText?.(suggestion.address);
-    onSelectSuggestion?.(suggestion);
-    inputRef.current?.blur();
-  }, [onChangeText, onSelectSuggestion]);
+  const handleSelectAddress = useCallback((address: string) => {
+    onSelectAddress?.(address);
+  }, [onSelectAddress]);
 
   // ============================================================================
   // COMPUTED STYLES
   // ============================================================================
 
   const getContainerStyle = (): { backgroundColor: string; borderWidth: number; borderColor: string } => {
-    const isActive = (hasError || isFocused) && !isDisabled;
-    
     let backgroundColor: string = COLORS.white;
     let borderColor: string = COLORS.outline;
-    let borderWidth = isActive ? 2 : 1;
+    let borderWidth = hasError && !isDisabled ? 2 : 1;
 
     if (isDisabled) {
       backgroundColor = COLORS.surfaceDisabled;
     } else if (hasError) {
       backgroundColor = COLORS.negativeSurface;
       borderColor = COLORS.negative;
-    } else if (isFocused) {
-      backgroundColor = COLORS.primarySurface;
-      borderColor = COLORS.primary;
     }
 
     return {
@@ -299,7 +397,6 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
     };
   };
 
-  // Get style for grouped inputs (background + border radius to match row)
   const getGroupedStyle = (): any => {
     let backgroundColor: string = COLORS.white;
 
@@ -307,8 +404,6 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
       backgroundColor = COLORS.surfaceDisabled;
     } else if (hasError) {
       backgroundColor = COLORS.negativeSurface;
-    } else if (isFocused) {
-      backgroundColor = COLORS.primarySurface;
     }
 
     const style: any = { backgroundColor };
@@ -331,13 +426,12 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
     return style;
   };
 
-  // Get border overlay style for grouped inputs
   const getGroupedBorderOverlay = (): any => {
-    const isActive = (hasError || isFocused) && !isDisabled;
+    const isActive = hasError && !isDisabled;
     if (!isActive) return null;
 
     const radius = SPACING.borderRadius;
-    const borderColor = hasError ? COLORS.negative : COLORS.primary;
+    const borderColor = COLORS.negative;
     
     const style: any = {
       position: 'absolute',
@@ -377,7 +471,7 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
 
   const getContentPadding = () => {
     if (_isGrouped) return SPACING.paddingHorizontal;
-    const isActive = (hasError || isFocused) && !isDisabled;
+    const isActive = hasError && !isDisabled;
     return isActive ? SPACING.paddingHorizontal - 1 : SPACING.paddingHorizontal;
   };
 
@@ -386,7 +480,7 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
     return COLORS.subtext;
   };
 
-  const getInputColor = () => {
+  const getValueColor = () => {
     if (isDisabled) return COLORS.disabledText;
     if (hasError) return COLORS.negative;
     return COLORS.onSurface;
@@ -405,39 +499,42 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
     color: getLabelColor(),
   };
 
-  const inputOpacity = labelAnim.interpolate({
+  // Animated value visibility
+  const valueOpacity = labelAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0, 0, 1],
   });
 
-  const inputHeight = labelAnim.interpolate({
+  const valueHeight = labelAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 27],
   });
-
 
   // ============================================================================
   // RENDER
   // ============================================================================
 
-  // Grouped inputs render with border overlay (no layout shifts)
+  // Grouped inputs render with border overlay
   if (_isGrouped) {
     const borderOverlay = getGroupedBorderOverlay();
     
     return (
-      <View style={styles.groupedWrapper}>
-        <TouchableWithoutFeedback onPress={handleContainerPress}>
-          <View 
-            style={[
-              styles.groupedContainer, 
-              fullWidth && styles.fullWidth, 
-              getGroupedStyle(),
-            ]}
-          >
-            {/* Border overlay - absolutely positioned, doesn't affect layout */}
-            {borderOverlay && <View style={borderOverlay} />}
-            
-            <View style={[styles.content, { paddingHorizontal: getContentPadding() }]}>
+      <>
+        <TouchableOpacity
+          style={[
+            styles.groupedContainer,
+            fullWidth && styles.fullWidth,
+            getGroupedStyle(),
+          ]}
+          onPress={handlePress}
+          activeOpacity={isDisabled ? 1 : 0.7}
+          disabled={isDisabled}
+          testID={testID}
+        >
+          {borderOverlay && <View style={borderOverlay} />}
+          
+          <View style={[styles.content, { paddingHorizontal: getContentPadding() }]}>
+            <View style={styles.textContainer}>
               {placeholder && (
                 <Animated.Text 
                   style={[styles.label, animatedLabelStyle]} 
@@ -447,120 +544,84 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
                   {placeholder}
                 </Animated.Text>
               )}
-              <Animated.View style={{ opacity: inputOpacity, height: inputHeight, width: '100%', overflow: 'hidden' }}>
-                <TextInput
-                  ref={inputRef}
-                  style={[styles.input, { color: getInputColor() }]}
-                  value={currentValue}
-                  onChangeText={handleChangeText}
-                  onFocus={handleFocus}
-                  onBlur={handleBlur}
-                  placeholder={undefined}
-                  editable={!isDisabled}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  testID={testID ? `${testID}-input` : undefined}
-                />
+              <Animated.View style={{ opacity: valueOpacity, height: valueHeight, overflow: 'hidden' }}>
+                <Text 
+                  style={[styles.value, { color: getValueColor() }]}
+                  numberOfLines={1}
+                >
+                  {value}
+                </Text>
               </Animated.View>
             </View>
           </View>
-        </TouchableWithoutFeedback>
+        </TouchableOpacity>
 
-        {/* Suggestions Dropdown for grouped - positioned relative to group */}
-        {showSuggestions && (
-          <View style={[styles.suggestionsContainerGrouped, DROPDOWN_SHADOW]}>
-            <ScrollView 
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled
-            >
-              {limitedSuggestions.map((suggestion) => (
-                <SuggestionItem
-                  key={suggestion.id}
-                  suggestion={suggestion}
-                  searchText={currentValue}
-                  highlightMatch={highlightMatch}
-                  onSelect={handleSelectSuggestion}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        )}
-      </View>
+        <AddressModal
+          visible={isModalVisible}
+          placeholder={placeholder}
+          suggestions={limitedSuggestions}
+          onChangeText={handleChangeText}
+          onSelectAddress={handleSelectAddress}
+          onClose={handleClose}
+        />
+      </>
     );
   }
 
   return (
     <View style={styles.wrapper} testID={testID}>
-      {/* Input Container */}
-      <TouchableWithoutFeedback onPress={handleContainerPress}>
-        <View style={[styles.shadowWrapper, isDisabled ? {} : SHADOW]}>
-          <View style={[
-            styles.container, 
-            fullWidth && styles.fullWidth, 
-            getContainerStyle(),
-          ]}>
-            <View style={[styles.content, { paddingHorizontal: getContentPadding() }]}>
+      <View style={[styles.shadowWrapper, isDisabled ? {} : SHADOW]}>
+        <TouchableOpacity
+          style={[styles.container, fullWidth && styles.fullWidth, getContainerStyle()]}
+          onPress={handlePress}
+          activeOpacity={isDisabled ? 1 : 0.7}
+          disabled={isDisabled}
+        >
+          <View style={[styles.content, { paddingHorizontal: getContentPadding() }]}>
+            <View style={styles.textContainer}>
               {placeholder && (
                 <Animated.Text
                   style={[styles.label, animatedLabelStyle]}
                   pointerEvents="none"
+                  numberOfLines={1}
                 >
                   {placeholder}
                 </Animated.Text>
               )}
-              <Animated.View style={{ opacity: inputOpacity, height: inputHeight, width: '100%', overflow: 'hidden' }}>
-                <TextInput
-                  ref={inputRef}
-                  style={[styles.input, { color: getInputColor() }]}
-                  value={currentValue}
-                  onChangeText={handleChangeText}
-                  onFocus={handleFocus}
-                  onBlur={handleBlur}
-                  placeholder={undefined}
-                  editable={!isDisabled}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  testID={testID ? `${testID}-input` : undefined}
-                />
+              <Animated.View style={{ opacity: valueOpacity, height: valueHeight, overflow: 'hidden' }}>
+                <Text 
+                  style={[styles.value, { color: getValueColor() }]}
+                  numberOfLines={1}
+                >
+                  {value}
+                </Text>
               </Animated.View>
             </View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
-
-      {/* Suggestions Dropdown - Absolutely positioned */}
-      {showSuggestions && (
-        <View style={[styles.suggestionsContainer, DROPDOWN_SHADOW]}>
-          <ScrollView 
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled
-          >
-            {limitedSuggestions.map((suggestion) => (
-              <SuggestionItem
-                key={suggestion.id}
-                suggestion={suggestion}
-                searchText={currentValue}
-                highlightMatch={highlightMatch}
-                onSelect={handleSelectSuggestion}
-              />
-            ))}
-          </ScrollView>
-        </View>
-      )}
+        </TouchableOpacity>
+      </View>
 
       {/* Helper Text */}
-      {helperText && !showSuggestions && (
+      {helperText && (
         <Text style={[styles.helperText, isDisabled && styles.disabledText]}>
           {helperText}
         </Text>
       )}
 
       {/* Error Text */}
-      {errorText && !showSuggestions && (
+      {errorText && (
         <Text style={styles.errorText}>{errorText}</Text>
       )}
+
+      {/* Modal */}
+      <AddressModal
+        visible={isModalVisible}
+        placeholder={placeholder}
+        suggestions={limitedSuggestions}
+        onChangeText={handleChangeText}
+        onSelectAddress={handleSelectAddress}
+        onClose={handleClose}
+      />
     </View>
   );
 };
@@ -572,13 +633,6 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
 const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
-    zIndex: 100,
-    position: 'relative',
-  },
-  groupedWrapper: {
-    width: '100%',
-    zIndex: 100,
-    position: 'relative',
   },
   shadowWrapper: {
     borderRadius: SPACING.borderRadius,
@@ -598,23 +652,25 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  textContainer: {
+    flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'flex-start',
     gap: SPACING.gap,
   },
   label: {
     fontFamily: FONT_FAMILIES.nunito.medium,
     fontWeight: FONT_WEIGHTS.medium,
   },
-  input: {
+  value: {
     fontFamily: FONT_FAMILIES.nunito.medium,
     fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.medium,
     lineHeight: 27,
-    padding: 0,
-    margin: 0,
-    width: '100%',
   },
   helperText: {
     fontFamily: FONT_FAMILIES.nunito.medium,
@@ -636,43 +692,82 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.paddingHorizontal,
   },
   
-  // Suggestions dropdown - absolutely positioned below input
-  suggestionsContainer: {
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalInputContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  modalInputWrapper: {
+    height: SPACING.height,
+    borderRadius: SPACING.borderRadius,
+    borderWidth: 1,
+    borderColor: COLORS.outline,
+    backgroundColor: COLORS.white,
+  },
+  modalInputWrapperActive: {
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primarySurface,
+  },
+  modalInputContent: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.paddingHorizontal,
+    gap: SPACING.gap,
+  },
+  modalInputLabel: {
+    fontFamily: FONT_FAMILIES.nunito.medium,
+    fontSize: FONT_SIZES.xl,
+    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.subtext,
+    lineHeight: 27,
+  },
+  modalInputLabelSmall: {
+    fontSize: FONT_SIZES.sm,
+    lineHeight: 19,
+  },
+  modalInput: {
+    fontFamily: FONT_FAMILIES.nunito.medium,
+    fontSize: FONT_SIZES.xl,
+    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.onSurface,
+    lineHeight: 27,
+    padding: 0,
+    margin: 0,
+  },
+  modalInputPlaceholder: {
     position: 'absolute',
-    top: SPACING.height + 4, // 64px input height + 4px gap
+    top: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: COLORS.outline,
-    borderRadius: SPACING.borderRadius,
-    maxHeight: SPACING.suggestionItemHeight * 5, // Show max 5 items
-    overflow: 'hidden',
-    zIndex: 9999,
-    elevation: 8, // Android elevation
+    bottom: 0,
+    opacity: 0,
   },
-  // Suggestions dropdown for grouped inputs
-  suggestionsContainerGrouped: {
-    position: 'absolute',
-    top: SPACING.height + 4,
-    left: -1, // Align with group border
-    right: -1,
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: COLORS.outline,
-    borderRadius: SPACING.borderRadius,
-    maxHeight: SPACING.suggestionItemHeight * 5,
-    overflow: 'hidden',
-    zIndex: 9999,
-    elevation: 8,
+  suggestionsList: {
+    flex: 1,
   },
   suggestionItem: {
     height: SPACING.suggestionItemHeight,
     justifyContent: 'center',
-    paddingHorizontal: SPACING.paddingHorizontal,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.outlineLow,
-    backgroundColor: '#ffffff',
   },
   suggestionText: {
     fontFamily: FONT_FAMILIES.nunito.regular,
@@ -683,6 +778,29 @@ const styles = StyleSheet.create({
   suggestionTextBold: {
     fontFamily: FONT_FAMILIES.nunito.bold,
     fontWeight: FONT_WEIGHTS.bold,
+  },
+  modalFooter: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  selectButton: {
+    height: SPACING.height,
+    backgroundColor: COLORS.neutral,
+    borderRadius: SPACING.borderRadius,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectButtonDisabled: {
+    backgroundColor: COLORS.surfaceDisabled,
+  },
+  selectButtonText: {
+    fontFamily: FONT_FAMILIES.nunito.bold,
+    fontSize: FONT_SIZES.xl,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.white,
+  },
+  selectButtonTextDisabled: {
+    color: COLORS.disabledText,
   },
 });
 
