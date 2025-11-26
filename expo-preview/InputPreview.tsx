@@ -8,8 +8,18 @@ import { useFonts, Nunito_400Regular, Nunito_500Medium, Nunito_700Bold } from '@
 import { ArrowLeft } from 'phosphor-react-native';
 
 // Import components from local directory
-import { Input, InputSplit, InputSelect, InputGroup } from './components/Input';
+import { Input, InputSplit, InputSelect, InputAddress, InputGroup } from './components/Input';
+import type { AddressSuggestion } from './components/Input';
 import { COLORS } from './styles/colors';
+
+// Mock address suggestions (in real app, fetch from Google Places API)
+const mockAddressSuggestions: AddressSuggestion[] = [
+  { id: '1', address: '8689 Velma Ln., Tracy, CA' },
+  { id: '2', address: '8689 Velma Ave., Lamont, CA' },
+  { id: '3', address: '8689 Velma Way, Sacramento, CA' },
+  { id: '4', address: '8689 Velma Rd., Hopedale, IL' },
+  { id: '5', address: '8689 Velma Ave., Santa Rosa, CA' },
+];
 
 // Sample options for InputSelect
 const countryOptions = [
@@ -41,6 +51,32 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
   const [selectedCountryFilled, setSelectedCountryFilled] = useState<string>('us');
   const [selectedCountryError, setSelectedCountryError] = useState<string>('uk');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
+  
+  // InputAddress state
+  const [addressValue, setAddressValue] = useState('');
+  const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
+  const [filledAddress, setFilledAddress] = useState('8689 Velma Ln., Tracy, CA');
+  const [errorAddress, setErrorAddress] = useState('8689 Velma Ln., Tracy, CA');
+
+  // Simulate fetching address suggestions
+  const handleAddressChange = (text: string) => {
+    setAddressValue(text);
+    // Show suggestions when typing (in real app, debounce and call API)
+    if (text.length >= 3) {
+      // Filter mock suggestions to match input
+      const filtered = mockAddressSuggestions.filter(s => 
+        s.address.toLowerCase().includes(text.toLowerCase())
+      );
+      setAddressSuggestions(filtered.length > 0 ? filtered : mockAddressSuggestions);
+    } else {
+      setAddressSuggestions([]);
+    }
+  };
+
+  const handleSelectAddress = (suggestion: AddressSuggestion) => {
+    setAddressValue(suggestion.address);
+    setAddressSuggestions([]);
+  };
 
   // Load fonts
   const [fontsLoaded] = useFonts({
@@ -279,6 +315,74 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
                   rightPlaceholder="Price"
                 />
               </InputGroup>
+            </View>
+          </View>
+
+          {/* Section: Input Address */}
+          <View style={[styles.section, { zIndex: 100 }]}>
+            <Text style={styles.sectionTitle}>Input Address</Text>
+            <Text style={styles.description}>Autocomplete with suggestions (type "8689")</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputAddress
+                placeholder="Address"
+                value={addressValue}
+                suggestions={addressSuggestions}
+                onChangeText={handleAddressChange}
+                onSelectSuggestion={handleSelectAddress}
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Address Filled */}
+          <View style={[styles.section, { zIndex: 1 }]}>
+            <Text style={styles.sectionTitle}>Input Address - Filled</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputAddress
+                placeholder="Address"
+                value={filledAddress}
+                onChangeText={setFilledAddress}
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Address Error */}
+          <View style={[styles.section, { zIndex: 1 }]}>
+            <Text style={styles.sectionTitle}>Input Address - Error</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputAddress
+                placeholder="Address"
+                value={errorAddress}
+                onChangeText={setErrorAddress}
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+                errorText="If helper text exists, then the error validation text goes under it. Like this."
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Address Disabled */}
+          <View style={[styles.section, { zIndex: 1 }]}>
+            <Text style={styles.sectionTitle}>Input Address - Disabled</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputAddress
+                placeholder="Address"
+                disabled
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <InputAddress
+                placeholder="Address"
+                value="8689 Velma Ln., Tracy, CA"
+                disabled
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+              />
             </View>
           </View>
         </View>
