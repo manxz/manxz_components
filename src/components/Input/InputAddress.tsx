@@ -91,6 +91,10 @@ export interface InputAddressProps {
   testID?: string;
   /** Whether to highlight matching text in suggestions */
   highlightMatch?: boolean;
+  /** @internal Whether this is inside an InputGroup */
+  _isGrouped?: boolean;
+  /** @internal Position in group */
+  _groupPosition?: 'first' | 'middle' | 'last' | 'only';
 }
 
 // ============================================================================
@@ -201,6 +205,8 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
   fullWidth = true,
   testID,
   highlightMatch = true,
+  _isGrouped = false,
+  _groupPosition = 'only',
 }) => {
   // Limit suggestions to maxSuggestions
   const limitedSuggestions = suggestions.slice(0, maxSuggestions);
@@ -293,7 +299,84 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
     };
   };
 
+  // Get style for grouped inputs (background + border radius to match row)
+  const getGroupedStyle = (): any => {
+    let backgroundColor: string = COLORS.white;
+
+    if (isDisabled) {
+      backgroundColor = COLORS.surfaceDisabled;
+    } else if (hasError) {
+      backgroundColor = COLORS.negativeSurface;
+    } else if (isFocused) {
+      backgroundColor = COLORS.primarySurface;
+    }
+
+    const style: any = { backgroundColor };
+    
+    const radius = SPACING.borderRadius - 1;
+    switch (_groupPosition) {
+      case 'first':
+        style.borderTopLeftRadius = radius;
+        style.borderTopRightRadius = radius;
+        break;
+      case 'last':
+        style.borderBottomLeftRadius = radius;
+        style.borderBottomRightRadius = radius;
+        break;
+      case 'only':
+        style.borderRadius = radius;
+        break;
+    }
+
+    return style;
+  };
+
+  // Get border overlay style for grouped inputs
+  const getGroupedBorderOverlay = (): any => {
+    const isActive = (hasError || isFocused) && !isDisabled;
+    if (!isActive) return null;
+
+    const radius = SPACING.borderRadius;
+    const borderColor = hasError ? COLORS.negative : COLORS.primary;
+    
+    const style: any = {
+      position: 'absolute',
+      left: -1,
+      right: -1,
+      borderWidth: 2,
+      borderColor,
+      pointerEvents: 'none',
+    };
+
+    switch (_groupPosition) {
+      case 'first':
+        style.top = -1;
+        style.bottom = -1;
+        style.borderTopLeftRadius = radius;
+        style.borderTopRightRadius = radius;
+        break;
+      case 'last':
+        style.top = -1;
+        style.bottom = -1;
+        style.borderBottomLeftRadius = radius;
+        style.borderBottomRightRadius = radius;
+        break;
+      case 'only':
+        style.top = -1;
+        style.bottom = -1;
+        style.borderRadius = radius;
+        break;
+      default:
+        style.top = -1;
+        style.bottom = -1;
+        break;
+    }
+
+    return style;
+  };
+
   const getContentPadding = () => {
+    if (_isGrouped) return SPACING.paddingHorizontal;
     const isActive = (hasError || isFocused) && !isDisabled;
     return isActive ? SPACING.paddingHorizontal - 1 : SPACING.paddingHorizontal;
   };
@@ -336,6 +419,76 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
   // ============================================================================
   // RENDER
   // ============================================================================
+
+  // Grouped inputs render with border overlay (no layout shifts)
+  if (_isGrouped) {
+    const borderOverlay = getGroupedBorderOverlay();
+    
+    return (
+      <View style={styles.groupedWrapper}>
+        <TouchableWithoutFeedback onPress={handleContainerPress}>
+          <View 
+            style={[
+              styles.groupedContainer, 
+              fullWidth && styles.fullWidth, 
+              getGroupedStyle(),
+            ]}
+          >
+            {/* Border overlay - absolutely positioned, doesn't affect layout */}
+            {borderOverlay && <View style={borderOverlay} />}
+            
+            <View style={[styles.content, { paddingHorizontal: getContentPadding() }]}>
+              {placeholder && (
+                <Animated.Text 
+                  style={[styles.label, animatedLabelStyle]} 
+                  pointerEvents="none"
+                  numberOfLines={1}
+                >
+                  {placeholder}
+                </Animated.Text>
+              )}
+              <Animated.View style={{ opacity: inputOpacity, height: inputHeight, width: '100%', overflow: 'hidden' }}>
+                <TextInput
+                  ref={inputRef}
+                  style={[styles.input, { color: getInputColor() }]}
+                  value={currentValue}
+                  onChangeText={handleChangeText}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  placeholder={undefined}
+                  editable={!isDisabled}
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  testID={testID ? `${testID}-input` : undefined}
+                />
+              </Animated.View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+
+        {/* Suggestions Dropdown for grouped - positioned relative to group */}
+        {showSuggestions && (
+          <View style={[styles.suggestionsContainerGrouped, DROPDOWN_SHADOW]}>
+            <ScrollView 
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled
+            >
+              {limitedSuggestions.map((suggestion) => (
+                <SuggestionItem
+                  key={suggestion.id}
+                  suggestion={suggestion}
+                  searchText={currentValue}
+                  highlightMatch={highlightMatch}
+                  onSelect={handleSelectSuggestion}
+                />
+              ))}
+            </ScrollView>
+          </View>
+        )}
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrapper} testID={testID}>
@@ -422,6 +575,11 @@ const styles = StyleSheet.create({
     zIndex: 100,
     position: 'relative',
   },
+  groupedWrapper: {
+    width: '100%',
+    zIndex: 100,
+    position: 'relative',
+  },
   shadowWrapper: {
     borderRadius: SPACING.borderRadius,
   },
@@ -429,6 +587,11 @@ const styles = StyleSheet.create({
     height: SPACING.height,
     borderRadius: SPACING.borderRadius,
     overflow: 'hidden',
+  },
+  groupedContainer: {
+    height: SPACING.height,
+    position: 'relative',
+    overflow: 'visible',
   },
   fullWidth: {
     width: '100%',
@@ -488,6 +651,21 @@ const styles = StyleSheet.create({
     zIndex: 9999,
     elevation: 8, // Android elevation
   },
+  // Suggestions dropdown for grouped inputs
+  suggestionsContainerGrouped: {
+    position: 'absolute',
+    top: SPACING.height + 4,
+    left: -1, // Align with group border
+    right: -1,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: COLORS.outline,
+    borderRadius: SPACING.borderRadius,
+    maxHeight: SPACING.suggestionItemHeight * 5,
+    overflow: 'hidden',
+    zIndex: 9999,
+    elevation: 8,
+  },
   suggestionItem: {
     height: SPACING.suggestionItemHeight,
     justifyContent: 'center',
@@ -514,4 +692,3 @@ const styles = StyleSheet.create({
 
 export const InputAddress = memo(InputAddressComponent);
 export default InputAddress;
-

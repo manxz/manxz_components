@@ -385,6 +385,26 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
               />
             </View>
           </View>
+
+          {/* Section: Input Address in Group */}
+          <View style={[styles.section, { zIndex: 50 }]}>
+            <Text style={styles.sectionTitle}>Input Address in Group</Text>
+            <Text style={styles.description}>Combined with other inputs (type "8689")</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputGroup>
+                <Input placeholder="Full name" />
+                <InputAddress
+                  placeholder="Address"
+                  value={addressValue}
+                  suggestions={addressSuggestions}
+                  onChangeText={handleAddressChange}
+                  onSelectSuggestion={handleSelectAddress}
+                />
+                <Input placeholder="Phone number" />
+              </InputGroup>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
