@@ -8,8 +8,27 @@ import { useFonts, Nunito_400Regular, Nunito_500Medium, Nunito_700Bold } from '@
 import { ArrowLeft } from 'phosphor-react-native';
 
 // Import components from local directory
-import { Input, InputSplit, InputGroup } from './components/Input';
+import { Input, InputSplit, InputSelect, InputGroup } from './components/Input';
 import { COLORS } from './styles/colors';
+
+// Sample options for InputSelect
+const countryOptions = [
+  { label: 'United States', value: 'us' },
+  { label: 'Canada', value: 'ca' },
+  { label: 'Mexico', value: 'mx' },
+  { label: 'United Kingdom', value: 'uk' },
+  { label: 'Germany', value: 'de' },
+  { label: 'France', value: 'fr' },
+  { label: 'Spain', value: 'es' },
+  { label: 'Italy', value: 'it' },
+];
+
+const categoryOptions = [
+  { label: 'Electronics', value: 'electronics' },
+  { label: 'Clothing', value: 'clothing' },
+  { label: 'Food & Beverage', value: 'food' },
+  { label: 'Home & Garden', value: 'home' },
+];
 
 interface InputPreviewProps {
   onBack: () => void;
@@ -18,6 +37,10 @@ interface InputPreviewProps {
 export default function InputPreview({ onBack }: InputPreviewProps) {
   const [filledValue, setFilledValue] = useState('Typed');
   const [errorValue, setErrorValue] = useState('Typed');
+  const [selectedCountry, setSelectedCountry] = useState<string | undefined>(undefined);
+  const [selectedCountryFilled, setSelectedCountryFilled] = useState<string>('us');
+  const [selectedCountryError, setSelectedCountryError] = useState<string>('uk');
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
 
   // Load fonts
   const [fontsLoaded] = useFonts({
@@ -167,6 +190,94 @@ export default function InputPreview({ onBack }: InputPreviewProps) {
                 <Input placeholder="Full name" />
                 <Input placeholder="Email address" />
                 <Input placeholder="Phone number" />
+              </InputGroup>
+            </View>
+          </View>
+
+          {/* Section: Input Select */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Select</Text>
+            <Text style={styles.description}>Opens a modal picker on tap</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputSelect
+                placeholder="Placeholder text"
+                options={countryOptions}
+                value={selectedCountry}
+                onChange={setSelectedCountry}
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <InputSelect
+                placeholder="Placeholder text"
+                options={countryOptions}
+                value={selectedCountryFilled}
+                onChange={setSelectedCountryFilled}
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Select Error */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Select - Error</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputSelect
+                placeholder="Placeholder text"
+                options={countryOptions}
+                value={selectedCountryError}
+                onChange={setSelectedCountryError}
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+                errorText="If helper text exists, then the error validation text goes under it. Like this."
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Select Disabled */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Select - Disabled</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputSelect
+                placeholder="Placeholder text"
+                options={countryOptions}
+                disabled
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <InputSelect
+                placeholder="Placeholder text"
+                options={countryOptions}
+                value="ca"
+                disabled
+                helperText="This text helper is optional and can span as many lines as needed. But keep it short."
+              />
+            </View>
+          </View>
+
+          {/* Section: Input Select in Group */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Input Select in Group</Text>
+            <Text style={styles.description}>Combined with other inputs</Text>
+            
+            <View style={styles.inputWrapper}>
+              <InputGroup>
+                <Input placeholder="Product name" />
+                <InputSelect
+                  placeholder="Category"
+                  options={categoryOptions}
+                  value={selectedCategory}
+                  onChange={setSelectedCategory}
+                />
+                <InputSplit
+                  leftPlaceholder="Quantity"
+                  rightPlaceholder="Price"
+                />
               </InputGroup>
             </View>
           </View>
