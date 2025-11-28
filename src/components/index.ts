@@ -12,6 +12,10 @@ export { useButton, type UseButtonProps, type UseButtonReturn } from './Button/u
 export { Input, type InputProps } from './Input';
 export { useInput, type UseInputProps, type UseInputReturn } from './Input/useInput';
 
+export { Calendar, type CalendarProps } from './Calendar';
+export { CalendarWeek, type CalendarWeekProps } from './Calendar';
+export { CalendarTimeSlot, type CalendarTimeSlotProps, type CalendarTimeSlotState } from './Calendar';
+
 // Design System
 export { COLORS, type ColorName } from '../styles/colors';
 export { TYPOGRAPHY, FONT_FAMILIES, FONT_WEIGHTS, FONT_SIZES, type TypographyVariant } from '../styles/typography';

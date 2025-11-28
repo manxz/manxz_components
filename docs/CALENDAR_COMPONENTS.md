@@ -19,7 +19,11 @@ A full month calendar grid with navigation arrows to switch months.
 ### Import
 
 ```tsx
-import { Calendar } from '@/components/Calendar';
+// If using as a package
+import { Calendar } from 'manxz-components';
+
+// If using locally within expo-preview
+import { Calendar } from '../components/Calendar';
 ```
 
 ### Basic Usage
@@ -83,7 +87,11 @@ A horizontal week view with swipe navigation. Week always starts on Sunday.
 ### Import
 
 ```tsx
-import { CalendarWeek } from '@/components/Calendar';
+// If using as a package
+import { CalendarWeek } from 'manxz-components';
+
+// If using locally within expo-preview
+import { CalendarWeek } from '../components/Calendar';
 ```
 
 ### Basic Usage
@@ -153,7 +161,11 @@ A selectable time slot button for scheduling. Typically used in a grid or list.
 ### Import
 
 ```tsx
-import { CalendarTimeSlot } from '@/components/Calendar';
+// If using as a package
+import { CalendarTimeSlot } from 'manxz-components';
+
+// If using locally within expo-preview
+import { CalendarTimeSlot } from '../components/Calendar';
 ```
 
 ### Basic Usage
@@ -223,7 +235,7 @@ const bookedSlots = ['3']; // Already booked
 Here's how to combine all three components in a booking interface:
 
 ```tsx
-import { Calendar, CalendarWeek, CalendarTimeSlot } from '@/components/Calendar';
+import { Calendar, CalendarWeek, CalendarTimeSlot } from 'manxz-components';
 
 function BookingScreen() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
