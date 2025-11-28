@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } fr
 import { useFonts, Nunito_400Regular, Nunito_500Medium, Nunito_600SemiBold, Nunito_700Bold } from '@expo-google-fonts/nunito';
 import { ArrowLeft } from 'phosphor-react-native';
 
-import { Calendar, CalendarWeek } from './components/Calendar';
+import { Calendar, CalendarWeek, CalendarTimeSlot } from './components/Calendar';
 import { COLORS } from './styles/colors';
 
 interface CalendarPreviewProps {
@@ -17,8 +17,11 @@ interface CalendarPreviewProps {
 export default function CalendarPreview({ onBack }: CalendarPreviewProps) {
   // State for CalendarWeek
   const [weekSelectedDate, setWeekSelectedDate] = useState<Date>(new Date());
+  
+  // State for CalendarTimeSlot
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>('6-8PM');
 
-  // Sample highlighted dates (e.g., available dates)
+  // Sample highlighted dates (days with events)
   const highlightedDates = [
     new Date(2024, 5, 2),
     new Date(2024, 5, 3),
@@ -67,7 +70,7 @@ export default function CalendarPreview({ onBack }: CalendarPreviewProps) {
           {/* Section: Default Calendar */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Default Calendar</Text>
-            <Text style={styles.description}>Blue circle indicates today, gray background shows highlighted dates</Text>
+            <Text style={styles.description}>Blue circle indicates today, gray background shows days with events</Text>
             
             <View style={styles.calendarWrapper}>
               <Calendar
@@ -105,14 +108,39 @@ export default function CalendarPreview({ onBack }: CalendarPreviewProps) {
             </View>
           </View>
 
-          {/* Section: Disabled */}
+          {/* Section: Calendar Time Slots */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Disabled</Text>
-            <Text style={styles.description}>Non-interactive calendar</Text>
+            <Text style={styles.sectionTitle}>Time Slots</Text>
+            <Text style={styles.description}>Selectable time slots with three states</Text>
             
-            <View style={styles.calendarWrapper}>
-              <Calendar
-                disabled
+            <View style={styles.timeSlotsContainer}>
+              <CalendarTimeSlot
+                label="8-10AM"
+                state="disabled"
+              />
+              <CalendarTimeSlot
+                label="10AM-12PM"
+                state={selectedTimeSlot === '10AM-12PM' ? 'selected' : 'available'}
+                onPress={() => setSelectedTimeSlot('10AM-12PM')}
+              />
+              <CalendarTimeSlot
+                label="12-2PM"
+                state={selectedTimeSlot === '12-2PM' ? 'selected' : 'available'}
+                onPress={() => setSelectedTimeSlot('12-2PM')}
+              />
+              <CalendarTimeSlot
+                label="2-4PM"
+                state={selectedTimeSlot === '2-4PM' ? 'selected' : 'available'}
+                onPress={() => setSelectedTimeSlot('2-4PM')}
+              />
+              <CalendarTimeSlot
+                label="4-6PM"
+                state="disabled"
+              />
+              <CalendarTimeSlot
+                label="6-8PM"
+                state={selectedTimeSlot === '6-8PM' ? 'selected' : 'available'}
+                onPress={() => setSelectedTimeSlot('6-8PM')}
               />
             </View>
           </View>
@@ -182,5 +210,7 @@ const styles = StyleSheet.create({
   calendarWrapper: {
     marginBottom: 16,
   },
+  timeSlotsContainer: {
+    gap: 12,
+  },
 });
-

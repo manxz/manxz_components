@@ -4,21 +4,21 @@
  * Description:
  * A month calendar component with today indicator and date selection.
  * Shows a full month grid with weekday headers. Blue circle indicates today.
+ * Gray background indicates days with events.
  * 
  * Props:
  * - today: Date — Date to show as "today" with blue circle (defaults to current date)
  * - onSelectDate: (date: Date) => void — Callback when date is tapped
  * - onMonthChange: (date: Date) => void — Callback when month changes
- * - highlightedDates: Date[] — Dates to highlight with gray background
+ * - highlightedDates: Date[] — Dates to highlight with gray background (days with events)
  * - minDate: Date — Minimum selectable date
  * - maxDate: Date — Maximum selectable date
- * - disabled: boolean — Disables all interactions
  * - testID: string — Test identifier
  * 
  * Usage example:
  * <Calendar 
  *   onSelectDate={(date) => handleDateTap(date)}
- *   highlightedDates={availableDates}
+ *   highlightedDates={daysWithEvents}
  * />
  */
 
@@ -44,14 +44,12 @@ export interface CalendarProps {
   onSelectDate?: (date: Date) => void;
   /** Callback when month changes */
   onMonthChange?: (date: Date) => void;
-  /** Dates to highlight with gray background */
+  /** Dates to highlight with gray background (days with events) */
   highlightedDates?: Date[];
   /** Minimum selectable date */
   minDate?: Date;
   /** Maximum selectable date */
   maxDate?: Date;
-  /** Disables all interactions */
-  disabled?: boolean;
   /** Test identifier */
   testID?: string;
 }
@@ -116,7 +114,6 @@ interface DateCellProps {
   isWeekendDay: boolean;
   isFirst: boolean;
   isLast: boolean;
-  disabled: boolean;
   onPress: (date: Date) => void;
 }
 
@@ -128,14 +125,13 @@ const DateCell: React.FC<DateCellProps> = memo(({
   isWeekendDay,
   isFirst,
   isLast,
-  disabled,
   onPress,
 }) => {
   const handlePress = useCallback(() => {
-    if (!disabled && isCurrentMonth) {
+    if (isCurrentMonth) {
       onPress(date);
     }
-  }, [date, disabled, isCurrentMonth, onPress]);
+  }, [date, isCurrentMonth, onPress]);
 
   const getTextColor = () => {
     if (isToday) return COLORS.white;
@@ -156,10 +152,10 @@ const DateCell: React.FC<DateCellProps> = memo(({
         styles.dateCell,
         !isLast && styles.dateCellBorder,
         isHighlighted && !isToday && styles.dateCellHighlighted,
-        pressed && !disabled && isCurrentMonth && styles.dateCellPressed,
+        pressed && isCurrentMonth && styles.dateCellPressed,
       ]}
       onPress={handlePress}
-      disabled={disabled || !isCurrentMonth}
+      disabled={!isCurrentMonth}
     >
       {isToday ? (
         <View style={styles.todayContainer}>
@@ -188,7 +184,6 @@ const CalendarComponent: React.FC<CalendarProps> = ({
   highlightedDates = [],
   minDate,
   maxDate,
-  disabled = false,
   testID,
 }) => {
   // Today's date (defaults to current date)
@@ -265,28 +260,26 @@ const CalendarComponent: React.FC<CalendarProps> = ({
       <View style={styles.monthSelector}>
         <Pressable 
           onPress={goToPreviousMonth} 
-          disabled={disabled}
           hitSlop={8}
         >
           <CaretLeft 
             size={24} 
-            color={disabled ? COLORS.disabledText : COLORS.onSurface} 
+            color={COLORS.onSurface} 
             weight="regular" 
           />
         </Pressable>
         
-        <Text style={[styles.monthText, disabled && styles.disabledText]}>
+        <Text style={styles.monthText}>
           {MONTH_NAMES[month]}
         </Text>
         
         <Pressable 
           onPress={goToNextMonth} 
-          disabled={disabled}
           hitSlop={8}
         >
           <CaretRight 
             size={24} 
-            color={disabled ? COLORS.disabledText : COLORS.onSurface} 
+            color={COLORS.onSurface} 
             weight="regular" 
           />
         </Pressable>
@@ -328,7 +321,6 @@ const CalendarComponent: React.FC<CalendarProps> = ({
                 isWeekendDay={isWeekend(date)}
                 isFirst={cellIndex === 0}
                 isLast={cellIndex === 6}
-                disabled={disabled}
                 onPress={handleSelectDate}
               />
             ))}
@@ -358,9 +350,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.onSurface,
-  },
-  disabledText: {
-    color: COLORS.disabledText,
   },
   calendarGrid: {
     borderWidth: 1,
@@ -411,7 +400,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#eaeaea',
   },
   dateCellPressed: {
-    backgroundColor: '#f4f4f4', // Same as COLORS.whitePressed / outline button press
+    backgroundColor: '#f4f4f4',
   },
   dateText: {
     fontFamily: FONT_FAMILIES.nunito.semiBold,
@@ -441,4 +430,3 @@ const styles = StyleSheet.create({
 
 export const Calendar = memo(CalendarComponent);
 export default Calendar;
-
