@@ -8,8 +8,9 @@ import React, { useState } from 'react';
 import ComponentList from './ComponentList';
 import ButtonPreview from './ButtonPreview';
 import InputPreview from './InputPreview';
+import CalendarPreview from './CalendarPreview';
 
-type Screen = 'list' | 'button' | 'input';
+type Screen = 'list' | 'button' | 'input' | 'calendar';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('list');
@@ -22,6 +23,10 @@ export default function App() {
     {
       id: 'input',
       name: 'Input',
+    },
+    {
+      id: 'calendar',
+      name: 'Calendar',
     },
   ];
 
@@ -39,6 +44,10 @@ export default function App() {
 
   if (currentScreen === 'input') {
     return <InputPreview onBack={handleBack} />;
+  }
+
+  if (currentScreen === 'calendar') {
+    return <CalendarPreview onBack={handleBack} />;
   }
 
   return (

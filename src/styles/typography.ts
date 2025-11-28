@@ -23,6 +23,7 @@ export const FONT_FAMILIES = {
   nunito: {
     regular: 'Nunito-Regular',
     medium: 'Nunito-Medium',
+    semiBold: 'Nunito-SemiBold',
     bold: 'Nunito-Bold',
     extraBold: 'Nunito-ExtraBold',
   },
@@ -35,6 +36,7 @@ export const FONT_FAMILIES = {
 export const FONT_WEIGHTS = {
   regular: '400' as TextStyle['fontWeight'],
   medium: '500' as TextStyle['fontWeight'],
+  semiBold: '600' as TextStyle['fontWeight'],
   bold: '700' as TextStyle['fontWeight'],
   extraBold: '800' as TextStyle['fontWeight'],
 } as const;
