@@ -230,8 +230,9 @@ const CalendarWeekComponent: React.FC<CalendarWeekProps> = ({
   const selectedDate = selectedDateProp !== undefined ? selectedDateProp : today;
 
   // Anchor week state - the week at the center of our buffer
-  const [anchorWeekStart, setAnchorWeekStart] = useState(() => getWeekStart(today));
+  const [anchorWeekStart, setAnchorWeekStart] = useState(() => getWeekStart(selectedDate || today));
   const [containerWidth, setContainerWidth] = useState(SCREEN_WIDTH);
+  const lastSelectedWeekRef = useRef<number>(getWeekStart(selectedDate || today).getTime());
 
   // Generate all weeks (WEEKS_BUFFER before + current + WEEKS_BUFFER after)
   const weeks = useMemo(() => {
@@ -279,6 +280,22 @@ const CalendarWeekComponent: React.FC<CalendarWeekProps> = ({
       }, 0);
     }
   }, [anchorWeekStart, containerWidth]);
+
+  // Navigate to selected date's week when it changes externally
+  useEffect(() => {
+    if (!selectedDate) return;
+    
+    const selectedWeekStart = getWeekStart(selectedDate);
+    const selectedWeekTime = selectedWeekStart.getTime();
+    
+    // Only navigate if the week actually changed
+    if (selectedWeekTime !== lastSelectedWeekRef.current) {
+      lastSelectedWeekRef.current = selectedWeekTime;
+      needsRecenter.current = true;
+      currentIndexRef.current = CENTER_INDEX;
+      setAnchorWeekStart(selectedWeekStart);
+    }
+  }, [selectedDate]);
 
   // Handle scroll end - recenter if near edges
   const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {

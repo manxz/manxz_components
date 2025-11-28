@@ -130,6 +130,10 @@ const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 - Swipe right → Previous week
 - Native scroll physics with paging
 
+### Auto-Navigation
+
+When `selectedDate` changes (e.g., from a month Calendar), CalendarWeek automatically navigates to show that week. This makes them work seamlessly together.
+
 ### Example: Week View with Events
 
 ```tsx
@@ -149,6 +153,23 @@ const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     console.log(`Showing week: ${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`);
     // Optionally prefetch events for this week
   }}
+/>
+```
+
+### Example: Synced with Month Calendar
+
+```tsx
+const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+{/* Month view - pick Dec 5th here... */}
+<Calendar
+  onSelectDate={(date) => setSelectedDate(date)}
+/>
+
+{/* ...and the week view automatically shows Dec 5th's week */}
+<CalendarWeek
+  selectedDate={selectedDate}
+  onSelectDate={(date) => setSelectedDate(date)}
 />
 ```
 
