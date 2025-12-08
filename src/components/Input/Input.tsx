@@ -78,6 +78,7 @@ export interface InputProps extends Omit<TextInputProps, 'value' | 'defaultValue
   _isGrouped?: boolean;
   /** @internal Position in group */
   _groupPosition?: 'first' | 'middle' | 'last' | 'only';
+  startFocused?: boolean;
 }
 
 // ============================================================================
@@ -120,6 +121,7 @@ const InputComponent: React.FC<InputProps> = ({
   testID,
   _isGrouped = false,
   _groupPosition = 'only',
+  startFocused = false,
   ...textInputProps
 }) => {
   const {
@@ -161,6 +163,12 @@ const InputComponent: React.FC<InputProps> = ({
       inputRef.current.focus();
     }
   };
+
+  useEffect(() => {
+    if (startFocused && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [startFocused]);
 
   // ============================================================================
   // COMPUTED STYLES
