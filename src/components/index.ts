@@ -15,6 +15,8 @@ export { InputAddress, type InputAddressProps } from './Input/InputAddress';
 export { InputGroup, type InputGroupProps } from './Input/InputGroup';
 export { InputMenu, type InputMenuProps } from './Input/InputMenu';
 export { InputRadio, type InputRadioProps } from './Input/InputRadio';
+export { InputSelect, type InputSelectProps } from './Input/InputSelect';
+export { InputSelectRadio, type InputSelectProps } from './Input/InputSelectRadio';
 export { InputSplit, type InputSplitProps } from './Input/InputSplit';
 
 export { Calendar, type CalendarProps } from './Calendar';
