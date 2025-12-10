@@ -95,6 +95,8 @@ const SPACING = {
   paddingHorizontal: 16,
   gap: 2,
   gapInputHelper: 4,
+  radioSize: 24,
+  radioInnerSize: 12,
 } as const;
 
 const SHADOW = {
