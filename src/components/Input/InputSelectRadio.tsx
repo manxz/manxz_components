@@ -48,7 +48,6 @@ import {
 import { CaretDown, Check, X } from 'phosphor-react-native';
 import { COLORS } from '../../styles/colors';
 import { FONT_FAMILIES, FONT_WEIGHTS, FONT_SIZES } from '../../styles/typography';
-import { InputRadio } from './InputRadio';
 
 // ============================================================================
 // TYPES
@@ -106,6 +105,28 @@ const SHADOW = {
   elevation: 2,
 };
 
+interface RadioCircleProps {
+  selected: boolean;
+}
+
+const RadioCircle: React.FC<RadioCircleProps> = memo(({ selected }) => {
+
+  return (
+    <View style={[
+      styles.radioCircle,
+      { borderColor: COLORS.onSurface },
+      disabled && styles.radioCircleDisabled,
+    ]}>
+      {selected && (
+        <View style={[
+          styles.radioInner,
+          { backgroundColor: COLORS.onSurface },
+        ]} />
+      )}
+    </View>
+  );
+});
+
 // ============================================================================
 // OPTION ITEM COMPONENT
 // ============================================================================
@@ -127,11 +148,17 @@ const OptionItem: React.FC<OptionItemProps> = memo(({ option, isSelected, onSele
       onPress={handlePress}
       activeOpacity={0.7}
     >
-      <InputRadio
-        label={option.label}
-        selected={isSelected}
-        onPress={onSelect}
-      />
+      <View style={styles.radioContent}>
+        <Text
+          style={[styles.radioLabel, { color: COLORS.onSurface }]}
+          numberOfLines={1}
+        >
+          {option.label}
+        </Text>
+        <RadioCircle
+          selected={isSelected}
+        />
+      </View>
     </TouchableOpacity>
   );
 });
@@ -634,6 +661,35 @@ const styles = StyleSheet.create({
   },
   optionLabelSelected: {
     color: COLORS.primary,
+  },
+
+  radioContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.paddingHorizontal,
+    paddingVertical: SPACING.paddingVertical,
+  },
+  radioLabel: {
+    fontFamily: FONT_FAMILIES.nunito.medium,
+    fontSize: FONT_SIZES.xl,
+    fontWeight: FONT_WEIGHTS.medium,
+    lineHeight: 27,
+    flex: 1,
+  },
+  radioCircle: {
+    width: SPACING.radioSize,
+    height: SPACING.radioSize,
+    borderRadius: SPACING.radioSize / 2,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: SPACING.radioInnerSize,
+    height: SPACING.radioInnerSize,
+    borderRadius: SPACING.radioInnerSize / 2,
   },
 });
 
