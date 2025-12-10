@@ -54,18 +54,18 @@ import { InputRadio } from './InputRadio';
 // TYPES
 // ============================================================================
 
-export interface SelectOption {
+export interface SelectRadioOption {
   label: string;
   value: string;
 }
 
-export interface InputSelectProps {
+export interface InputSelectRadioProps {
   /** Currently selected value */
   value?: string;
   /** Placeholder text */
   placeholder?: string;
   /** Available options */
-  options: SelectOption[];
+  options: SelectRadioOption[];
   /** Optional helper text shown below input */
   helperText?: string;
   /** Optional error text (triggers error state) */
@@ -111,7 +111,7 @@ const SHADOW = {
 // ============================================================================
 
 interface OptionItemProps {
-  option: SelectOption;
+  option: SelectRadioOption;
   isSelected: boolean;
   onSelect: (value: string) => void;
 }
@@ -143,7 +143,7 @@ const OptionItem: React.FC<OptionItemProps> = memo(({ option, isSelected, onSele
 interface SelectModalProps {
   visible: boolean;
   title: string;
-  options: SelectOption[];
+  options: SelectRadioOption[];
   selectedValue?: string;
   onSelect: (value: string) => void;
   onClose: () => void;
@@ -162,7 +162,7 @@ const SelectModal: React.FC<SelectModalProps> = memo(({
     onClose();
   }, [onSelect, onClose]);
 
-  const renderItem = useCallback(({ item }: { item: SelectOption }) => (
+  const renderItem = useCallback(({ item }: { item: SelectRadioOption }) => (
     <OptionItem
       option={item}
       isSelected={item.value === selectedValue}
@@ -170,7 +170,7 @@ const SelectModal: React.FC<SelectModalProps> = memo(({
     />
   ), [selectedValue, handleSelect]);
 
-  const keyExtractor = useCallback((item: SelectOption) => item.value, []);
+  const keyExtractor = useCallback((item: SelectRadioOption) => item.value, []);
 
   return (
     <Modal
@@ -210,7 +210,7 @@ const SelectModal: React.FC<SelectModalProps> = memo(({
 // MAIN COMPONENT
 // ============================================================================
 
-const InputSelectComponent: React.FC<InputSelectProps> = ({
+const InputSelectComponent: React.FC<InputSelectRadioProps> = ({
   value,
   placeholder = '',
   options,
@@ -641,5 +641,5 @@ const styles = StyleSheet.create({
 // EXPORT
 // ============================================================================
 
-export const InputSelect = memo(InputSelectComponent);
-export default InputSelect;
+export const InputSelectRadio = memo(InputSelectComponent);
+export default InputSelectRadio;
