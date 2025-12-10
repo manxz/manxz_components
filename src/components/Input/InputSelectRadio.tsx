@@ -115,7 +115,6 @@ const RadioCircle: React.FC<RadioCircleProps> = memo(({ selected }) => {
     <View style={[
       styles.radioCircle,
       { borderColor: COLORS.onSurface },
-      disabled && styles.radioCircleDisabled,
     ]}>
       {selected && (
         <View style={[
