@@ -369,6 +369,12 @@ const InputComponent: React.FC<InputProps> = ({
             </Animated.View>
           </View>
         </View>
+
+        {/* Error Text */}
+        {errorText && (
+          <Text style={styles.errorText}>{errorText}</Text>
+        )}
+
       </TouchableWithoutFeedback>
     );
   }
