@@ -8,6 +8,7 @@
 import React, { memo, Children, cloneElement, isValidElement } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { COLORS } from '../../styles/colors';
+import { FONT_FAMILIES, FONT_SIZES } from '../../styles/typography';
 
 // ============================================================================
 // TYPES
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
   errors: {
     color: COLORS.negative,
     fontFamily: FONT_FAMILIES.nunito.medium,
-    fontSize: 16,
+    fontSize: FONT_SIZES.base,
   }
 });
 
