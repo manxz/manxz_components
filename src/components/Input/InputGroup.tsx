@@ -126,8 +126,8 @@ const InputGroupComponent: React.FC<InputGroupProps> = ({
         );
       })}
     </View>
-    {errorTexts && errorTexts.map((text) => (
-      <Text style={styles.errors}>{text}</Text>
+    {errorTexts && errorTexts.map((text, index) => (
+      <Text key={index} style={styles.errors}>{text}</Text>
     ))}
     </>
   );
