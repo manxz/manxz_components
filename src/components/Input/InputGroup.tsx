@@ -140,7 +140,7 @@ const InputGroupComponent: React.FC<InputGroupProps> = ({
 const styles = StyleSheet.create({
   wrapper: {
     borderRadius: SPACING.borderRadius,
-    overflow: 'visible', // Allow border overlays to extend outside
+    overflow: 'hidden', // Allow border overlays to extend outside
   },
   fullWidth: {
     width: '100%',
