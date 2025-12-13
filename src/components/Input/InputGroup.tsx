@@ -54,7 +54,7 @@ const InputGroupComponent: React.FC<InputGroupProps> = ({
   const childCount = childArray.length;
 
   return (
-    <>
+   <View style={[fullWidth && styles.fullWidth]}>
     <View 
       style={[
         styles.wrapper, 
@@ -126,10 +126,12 @@ const InputGroupComponent: React.FC<InputGroupProps> = ({
         );
       })}
     </View>
-    {errorTexts && errorTexts.map((text, index) => (
-      <Text key={index} style={styles.errors}>{text}</Text>
-    ))}
-    </>
+    <View>
+      {errorTexts && errorTexts.map((text, index) => (
+        <Text key={index} style={styles.errors}>{text}</Text>
+      ))}
+    </View>
+   </View>
   );
 };
 
