@@ -332,7 +332,6 @@ const InputComponent: React.FC<InputProps> = ({
     const borderOverlay = getGroupedBorderOverlay();
     
     return (
-    <View style={styles.wrapper} testID={testID}>
       <TouchableWithoutFeedback onPress={handleContainerPress}>
         <View 
           style={[
@@ -368,14 +367,9 @@ const InputComponent: React.FC<InputProps> = ({
                 {...textInputProps}
               />
             </Animated.View>
-            {/* Error Text */}
-            {errorText && (
-              <Text style={styles.errorText}>{errorText}</Text>
-            )}
           </View>
         </View>
       </TouchableWithoutFeedback>
-    </View>
     );
   }
 

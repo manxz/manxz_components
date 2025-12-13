@@ -17,6 +17,7 @@ export interface InputGroupProps {
   children: React.ReactNode;
   disabled?: boolean;
   fullWidth?: boolean;
+  errorTexts?: string[];
   testID?: string;
 }
 
@@ -45,12 +46,14 @@ const InputGroupComponent: React.FC<InputGroupProps> = ({
   children,
   disabled = false,
   fullWidth = true,
+  errorTexts = [],
   testID,
 }) => {
   const childArray = Children.toArray(children).filter(isValidElement);
   const childCount = childArray.length;
 
   return (
+    <>
     <View 
       style={[
         styles.wrapper, 
@@ -122,6 +125,10 @@ const InputGroupComponent: React.FC<InputGroupProps> = ({
         );
       })}
     </View>
+    {errorTexts && errorTexts.map((text) => (
+      <Text style={styles.errors}>{text}</Text>
+    ))}
+    </>
   );
 };
 
@@ -137,6 +144,11 @@ const styles = StyleSheet.create({
   fullWidth: {
     width: '100%',
   },
+  errors: {
+    color: COLORS.negative,
+    fontFamily: FONT_FAMILIES.nunito.medium,
+    fontSize: 16,
+  }
 });
 
 // ============================================================================
