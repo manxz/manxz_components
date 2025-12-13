@@ -6,7 +6,7 @@
  */
 
 import React, { memo, Children, cloneElement, isValidElement } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import { COLORS } from '../../styles/colors';
 import { FONT_FAMILIES, FONT_SIZES } from '../../styles/typography';
 
