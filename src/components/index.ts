@@ -9,6 +9,9 @@
 export { Button, type ButtonProps, type ButtonVariant } from './Button';
 export { useButton, type UseButtonProps, type UseButtonReturn } from './Button/useButton';
 
+export { Modal, type ModalProps } from './Modal';
+export { useModal, type UseModalProps, type UseModalReturn } from './Modal/useModal';
+
 export { Input, type InputProps } from './Input';
 export { useInput, type UseInputProps, type UseInputReturn } from './Input/useInput';
 export { InputAddress, type InputAddressProps } from './Input/InputAddress';
