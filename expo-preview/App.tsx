@@ -9,8 +9,9 @@ import ComponentList from './ComponentList';
 import ButtonPreview from './ButtonPreview';
 import InputPreview from './InputPreview';
 import CalendarPreview from './CalendarPreview';
+import ModalPreview from './ModalPreview';
 
-type Screen = 'list' | 'button' | 'input' | 'calendar';
+type Screen = 'list' | 'button' | 'input' | 'calendar' | 'modal';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('list');
@@ -27,6 +28,10 @@ export default function App() {
     {
       id: 'calendar',
       name: 'Calendar',
+    },
+    {
+      id: 'modal',
+      name: 'Modal',
     },
   ];
 
@@ -48,6 +53,10 @@ export default function App() {
 
   if (currentScreen === 'calendar') {
     return <CalendarPreview onBack={handleBack} />;
+  }
+
+  if (currentScreen === 'modal') {
+    return <ModalPreview onBack={handleBack} />;
   }
 
   return (
