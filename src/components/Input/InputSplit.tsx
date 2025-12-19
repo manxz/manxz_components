@@ -29,6 +29,8 @@ export interface InputSplitProps {
   rightDefaultValue?: string;
   onLeftChange?: (text: string) => void;
   onRightChange?: (text: string) => void;
+  leftKeyboardType?: string;
+  rightKeyboardType?: string;
   disabled?: boolean;
   fullWidth?: boolean;
   testID?: string;
@@ -71,6 +73,7 @@ interface InputCellProps {
   inputRef: React.RefObject<TextInput>;
   onFocusChange: (focused: boolean) => void;
   otherCellFocused: boolean;
+  keyboardType?: string;
 }
 
 const InputCell: React.FC<InputCellProps> = ({
@@ -85,6 +88,7 @@ const InputCell: React.FC<InputCellProps> = ({
   inputRef,
   onFocusChange,
   otherCellFocused,
+  keyboardType,
 }) => {
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [isFocused, setIsFocused] = useState(false);
@@ -284,6 +288,7 @@ const InputCell: React.FC<InputCellProps> = ({
               onBlur={handleBlur}
               placeholder={undefined}
               editable={!disabled}
+              keyboardType={keyboardType}
             />
           </Animated.View>
         </View>
@@ -305,6 +310,8 @@ const InputSplitComponent: React.FC<InputSplitProps> = ({
   rightDefaultValue,
   onLeftChange,
   onRightChange,
+  leftKeyboardType = 'default',
+  rightKeyboardType = 'default',
   disabled = false,
   fullWidth = true,
   testID,
@@ -339,6 +346,7 @@ const InputSplitComponent: React.FC<InputSplitProps> = ({
           inputRef={leftInputRef}
           onFocusChange={setLeftFocused}
           otherCellFocused={rightFocused}
+          keyboardType={leftKeyboardType}
         />
         {/* Divider - always visible */}
         <View style={styles.divider} />
@@ -354,6 +362,7 @@ const InputSplitComponent: React.FC<InputSplitProps> = ({
           inputRef={rightInputRef}
           onFocusChange={setRightFocused}
           otherCellFocused={leftFocused}
+          keyboardType={rightKeyboardType}
         />
       </View>
     </View>
