@@ -46,6 +46,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
+import { X } from 'phosphor-react-native';
 import { COLORS } from '../../styles/colors';
 import { FONT_FAMILIES, FONT_WEIGHTS, FONT_SIZES } from '../../styles/typography';
 
@@ -276,6 +277,13 @@ const AddressModal: React.FC<AddressModalProps> = memo(({
       <SafeAreaView style={styles.modalContainer}>
         {/* Header with Done button */}
         <View style={styles.modalHeader}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+            activeOpacity={0.7}
+          >
+            <X size={24} color={COLORS.onSurface} weight="regular" />
+          </TouchableOpacity>
           <Text style={styles.modalTitle}>{title}</Text>
           <TouchableOpacity
             style={styles.doneButton} 
@@ -750,6 +758,12 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.primary,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalInputContainer: {
     paddingHorizontal: 20,
