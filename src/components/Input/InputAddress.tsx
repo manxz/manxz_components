@@ -81,6 +81,8 @@ export interface InputAddressProps {
   onSelectAddress?: (address: string) => void;
   /** Whether input should take full width */
   fullWidth?: boolean;
+  /** Modal title */
+  modalTitle?: string;
   /** Test identifier */
   testID?: string;
   /** @internal Whether this is inside an InputGroup */
@@ -174,6 +176,7 @@ const SuggestionItem: React.FC<SuggestionItemProps> = memo(({
 
 interface AddressModalProps {
   visible: boolean;
+  title: string;
   placeholder: string;
   initialValue: string;
   suggestions: AddressSuggestion[];
@@ -184,6 +187,7 @@ interface AddressModalProps {
 
 const AddressModal: React.FC<AddressModalProps> = memo(({
   visible,
+  title,
   placeholder,
   initialValue,
   suggestions,
@@ -272,7 +276,8 @@ const AddressModal: React.FC<AddressModalProps> = memo(({
       <SafeAreaView style={styles.modalContainer}>
         {/* Header with Done button */}
         <View style={styles.modalHeader}>
-          <TouchableOpacity 
+          <Text style={styles.modalTitle}>{title}</Text>
+          <TouchableOpacity
             style={styles.doneButton} 
             onPress={handleDone}
             activeOpacity={0.7}
@@ -345,6 +350,7 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
   onChangeText,
   onSelectAddress,
   fullWidth = true,
+  modalTitle,
   testID,
   _isGrouped = false,
   _groupPosition = 'only',
@@ -571,6 +577,7 @@ const InputAddressComponent: React.FC<InputAddressProps> = ({
 
         <AddressModal
           visible={isModalVisible}
+          title={modalTitle || placeholder}
           placeholder={placeholder}
           initialValue={value || ''}
           suggestions={limitedSuggestions}
@@ -712,12 +719,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  modalHeader: {
+  modalHeaderOld: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.outline,
+  },
+  modalTitle: {
+    fontFamily: FONT_FAMILIES.nunito.bold,
+    fontSize: FONT_SIZES.xl,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.onSurface,
   },
   doneButton: {
     paddingVertical: 8,
