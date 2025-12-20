@@ -740,7 +740,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: 1,
     borderBottomColor: COLORS.outline,
   },
   modalTitle: {
@@ -767,7 +766,6 @@ const styles = StyleSheet.create({
   },
   modalInputContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 16,
   },
   modalInputWrapper: {
     height: SPACING.height,
